@@ -1,4 +1,4 @@
-import { ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ConfigService } from './config/config.service';
@@ -19,9 +19,13 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const port = configService.port;
 
-  await app.listen(port, () => {
-    console.log(`Server is up and running on port ${port}`);
-  });
+  const logger = new Logger('Bootstrap');
+  await app.listen(port, () =>
+    logger.log('Server is up and running on port 3000'),
+  );
 }
 
-bootstrap();
+bootstrap().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
