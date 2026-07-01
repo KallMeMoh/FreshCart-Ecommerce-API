@@ -1,5 +1,5 @@
 import { IsString, IsStrongPassword, Matches } from 'class-validator';
-import { MatchesField } from '../../common/decorators/matches-field';
+import { MatchesField } from '../../../common/decorators/matches-field';
 
 export class ResetPasswordDto {
   @IsString()

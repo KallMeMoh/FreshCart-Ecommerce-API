@@ -8,9 +8,8 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import type { Request } from 'express';
 import { Redis } from 'ioredis';
-import { Types } from 'mongoose';
-import { ConfigService } from '../../config/config.service';
-import { UserRepository } from '../../user/user.repository';
+import { ConfigService } from '../../modules/config/config.service';
+import { UserRepository } from '../../modules/user/user.repository';
 
 @Injectable()
 export class RefreshTokenGuardTokenGuard implements CanActivate {
@@ -31,14 +30,14 @@ export class RefreshTokenGuardTokenGuard implements CanActivate {
         throw new UnauthorizedException('Invalid Authorization Header');
 
       const token = header.split(' ')[1]?.trim();
-      let payload: { sub?: string; jti?: string };
+      let payload: { sub: string | undefined; jti: string | undefined };
       try {
-        payload = this.jwtService.verify<{ sub?: string; jti?: string }>(
-          token,
-          {
-            secret: this.configService.refreshSecret,
-          },
-        );
+        payload = this.jwtService.verify<{
+          sub: string | undefined;
+          jti: string | undefined;
+        }>(token, {
+          secret: this.configService.refreshSecret,
+        });
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (_) {
         throw new UnauthorizedException('Invalid or malformed token');
@@ -51,9 +50,7 @@ export class RefreshTokenGuardTokenGuard implements CanActivate {
       )
         throw new UnauthorizedException('Invalid or malformed token');
 
-      const user = await this.userRepository.findById(
-        new Types.ObjectId(payload.sub),
-      );
+      const user = await this.userRepository.findById(payload.sub);
       if (!user) throw new UnauthorizedException('Invalid or malformed token');
 
       req.user = user;

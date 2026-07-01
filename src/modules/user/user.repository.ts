@@ -5,7 +5,6 @@ import {
   Model,
   ProjectionType,
   QueryOptions,
-  Types,
   UpdateQuery,
   UpdateWithAggregationPipeline,
 } from 'mongoose';
@@ -32,7 +31,7 @@ export class UserRepository {
     return this.userModel.exists({ email });
   }
 
-  async create(data: User) {
+  async create(data: Partial<User>) {
     return this.userModel.create(data);
   }
 
@@ -44,7 +43,7 @@ export class UserRepository {
     return this.userModel.findOne({ email }, projection).lean();
   }
 
-  async findById(userId: Types.ObjectId, projection?: ProjectionType<User>) {
+  async findById(userId: string, projection?: ProjectionType<User>) {
     return this.userModel.findOne({ _id: userId }, projection).lean();
   }
 
@@ -53,29 +52,29 @@ export class UserRepository {
   }
 
   updateById(
-    userId: Types.ObjectId,
+    userId: string,
     updates: UpdateQuery<User> | UpdateWithAggregationPipeline,
     options?: QueryOptions<User>,
   ) {
     return this.userModel.findOneAndUpdate({ _id: userId }, updates, options);
   }
 
-  deleteById(userId: Types.ObjectId) {
+  deleteById(userId: string) {
     return this.userModel.updateOne({ _id: userId }, { deletedAt: new Date() });
   }
 
-  updatePassword(userId: Types.ObjectId, hashedPassword: string) {
+  updatePassword(userId: string, hashedPassword: string) {
     return this.userModel.updateOne(
       { _id: userId },
       { $set: { hashed_password: hashedPassword } },
     );
   }
 
-  async getVerificationCode(userId: Types.ObjectId) {
+  async getVerificationCode(userId: string) {
     return this.redisClient.get(this.verificationCode(userId.toString()));
   }
 
-  async setVerificationCode(userId: Types.ObjectId, code: string) {
+  async setVerificationCode(userId: string, code: string) {
     return this.redisClient.set(
       this.verificationCode(userId.toString()),
       code,
@@ -84,19 +83,19 @@ export class UserRepository {
     );
   }
 
-  async delVerificationCode(userId: Types.ObjectId) {
+  async delVerificationCode(userId: string) {
     return this.redisClient.del(this.verificationCode(userId.toString()));
   }
 
-  async verificationCodeExists(userId: Types.ObjectId) {
+  async verificationCodeExists(userId: string) {
     return this.redisClient.exists(this.verificationCode(userId.toString()));
   }
 
-  async get2FAActivationCode(userId: Types.ObjectId) {
+  async get2FAActivationCode(userId: string) {
     return this.redisClient.get(this.twoFAActivationCode(userId.toString()));
   }
 
-  async set2FAActivationCode(userId: Types.ObjectId, code: string) {
+  async set2FAActivationCode(userId: string, code: string) {
     return this.redisClient.set(
       this.twoFAActivationCode(userId.toString()),
       code,
@@ -105,11 +104,11 @@ export class UserRepository {
     );
   }
 
-  async del2FAActivationCode(userId: Types.ObjectId) {
+  async del2FAActivationCode(userId: string) {
     return this.redisClient.del(this.twoFAActivationCode(userId.toString()));
   }
 
-  async twoFAActivationCodeExists(userId: Types.ObjectId) {
+  async twoFAActivationCodeExists(userId: string) {
     return this.redisClient.exists(this.twoFAActivationCode(userId.toString()));
   }
 }

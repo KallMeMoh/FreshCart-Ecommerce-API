@@ -1,20 +1,22 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { AuthModule } from './auth/auth.module';
-import { ConfigModule } from './config/config.module';
-import { CryptoModule } from './crypto/crypto.module';
-import { DatabaseModule } from './database/database.module';
-import { MailModule } from './mail/mail.module';
-import { UserModule } from './user/user.module';
 import { RedisModule } from '@nestjs-modules/ioredis';
-import { ConfigService } from './config/config.service';
-import { ProductModule } from './product/product.module';
-import { CategoryModule } from './category/category.module';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { LoggerMiddleware } from './middlewares/logger.middleware';
+import { AuthModule } from './modules/auth/auth.module';
+import { R2BucketModule } from './modules/bucket/bucket.module';
+import { CategoryModule } from './modules/category/category.module';
+import { ConfigModule } from './modules/config/config.module';
+import { ConfigService } from './modules/config/config.service';
+import { DatabaseModule } from './modules/database/database.module';
+import { MailModule } from './modules/mail/mail.module';
+import { ProductModule } from './modules/product/product.module';
+import { UserModule } from './modules/user/user.module';
 
 @Module({
   imports: [
     ConfigModule, // global
     DatabaseModule, // global
+    EventEmitterModule.forRoot({ global: true }), // global
     RedisModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
@@ -22,8 +24,9 @@ import { LoggerMiddleware } from './middlewares/logger.middleware';
         url: configService.redisUrl,
       }),
     }), // global
-    CryptoModule, // global
     MailModule, //global
+    R2BucketModule, // global
+    // CryptoModule, incase I need it in the future
     // features
     AuthModule,
     UserModule,

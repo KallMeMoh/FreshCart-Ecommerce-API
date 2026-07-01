@@ -2,15 +2,12 @@ import { Transform } from 'class-transformer';
 import {
   IsEmail,
   IsString,
-  IsStrongPassword,
-  IsUrl,
   Matches,
   MaxLength,
   MinLength,
 } from 'class-validator';
-import { MatchesField } from '../../common/decorators/matches-field';
 
-export class SignupDto {
+export class UpdateUserDto {
   @Transform(({ value }: { value?: string }) => value?.trim())
   @IsString()
   @MinLength(3, { message: 'Username must be at least 3 characters' })
@@ -26,14 +23,4 @@ export class SignupDto {
   @Transform(({ value }: { value?: string }) => value?.trim().toLowerCase())
   @IsEmail({}, { message: 'Invalid email address' })
   email!: string;
-
-  @IsStrongPassword()
-  password!: string;
-
-  @IsStrongPassword()
-  @MatchesField('password', { message: 'Passwords do not match' })
-  confirm_password!: string;
-
-  @IsUrl()
-  verificationRedirectUrl!: string;
 }

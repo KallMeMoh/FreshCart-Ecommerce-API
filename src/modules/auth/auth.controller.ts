@@ -14,8 +14,11 @@ import { SignupDto } from './dto/signup.dto';
 import type { Request } from 'express';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
-import { AccessTokenGuard } from '../common/guards/access-toke.guard';
-import { RefreshTokenGuardTokenGuard } from '../common/guards/refresh-toke.guard';
+import { AccessTokenGuard } from '../../common/guards/access-toke.guard';
+import { RefreshTokenGuardTokenGuard } from '../../common/guards/refresh-toke.guard';
+import { ExtractUser } from '../../common/decorators/extract-user';
+import { ExtractTokenId } from '../../common/decorators/extract-token-id';
+import { User } from '../user/entities/user.entity';
 
 @Controller('auth')
 export class AuthController {
@@ -62,11 +65,8 @@ export class AuthController {
 
   @UseGuards(RefreshTokenGuardTokenGuard)
   @Post('refresh-token')
-  async refreshToken(@Req() req: Request) {
-    const accessToken = await this.authService.rotateToken(
-      req.user!._id,
-      req.tokenId!,
-    );
+  refreshToken(@ExtractUser() user: User, @ExtractTokenId() tokenId: string) {
+    const accessToken = this.authService.rotateToken(user, tokenId);
     return { message: 'Token refreshed successfully', accessToken };
   }
 

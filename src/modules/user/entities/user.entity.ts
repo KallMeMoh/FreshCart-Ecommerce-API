@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import { HydratedDocument, Types } from 'mongoose';
 import { AuthProviderEnum } from '../../auth/enums/auth-provider.enum';
 import { UserRoleEnum } from '../enums/user-role.enum';
 
@@ -9,6 +9,8 @@ import { UserRoleEnum } from '../enums/user-role.enum';
   optimisticConcurrency: true,
 })
 export class User {
+  _id!: Types.ObjectId;
+
   @Prop({
     type: String,
     required: true,
@@ -72,6 +74,9 @@ export class User {
 
   @Prop({ type: Date, default: null })
   deletedAt!: Date | null;
+
+  createdAt!: Date;
+  updatedAt!: Date;
 }
 
 export type UserDocument = HydratedDocument<User>;

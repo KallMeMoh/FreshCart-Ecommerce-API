@@ -22,6 +22,8 @@ import { LoginConfirmationDto } from './dto/login-confirmation.dto';
 import { OAuth2Client } from 'google-auth-library';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { User } from '../user/entities/user.entity';
+import { OnEvent } from '@nestjs/event-emitter';
 
 @Injectable()
 export class AuthService {
@@ -84,7 +86,7 @@ export class AuthService {
     });
 
     const token = randomBytes(32).toString('hex');
-    await this.userRepository.setVerificationCode(user._id, token);
+    await this.userRepository.setVerificationCode(user._id.toString(), token);
 
     this.mailService
       .sendVerificationEmail(user.email, `${verificationRedirectUrl}/${token}`)
@@ -100,7 +102,9 @@ export class AuthService {
         'This account uses Google sign-in. Please continue with Google.',
       );
 
-    const loginAttempts = await this.authRepository.getLoginAttempts(user._id);
+    const loginAttempts = await this.authRepository.getLoginAttempts(
+      user._id.toString(),
+    );
     if (loginAttempts && parseInt(loginAttempts) > 5)
       throw new NotFoundException(
         'Account temporarily banned, try again later',
@@ -108,7 +112,7 @@ export class AuthService {
 
     const matchedPassword = await compare(password, user.hashedPassword!);
     if (!matchedPassword) {
-      await this.authRepository.incrementLoginAttempts(user._id);
+      await this.authRepository.incrementLoginAttempts(user._id.toString());
       throw new UnauthorizedException('Invalid credentials');
     }
 
@@ -122,7 +126,7 @@ export class AuthService {
       );
 
       const code = randomInt(100_000, 999_999).toString();
-      await this.authRepository.store2FACode(user._id, code);
+      await this.authRepository.store2FACode(user._id.toString(), code);
       await this.mailService.send2FAEmail(user.email, code);
 
       return { requires2FA: true, token } as const;
@@ -136,23 +140,24 @@ export class AuthService {
       secret: this.configService.pendingAuthSecret,
     });
 
-    const userId = new Types.ObjectId(payload.sub);
     const [user, code] = await Promise.all([
-      this.userRepository.findById(userId),
-      this.authRepository.get2FACode(userId),
+      this.userRepository.findById(payload.sub),
+      this.authRepository.get2FACode(payload.sub),
     ]);
 
     if (!user) throw new NotFoundException('Account does not exist');
     if (!code) throw new NotFoundException('OTP Expired, please login again');
 
-    const loginAttempts = await this.authRepository.getLoginAttempts(user._id);
+    const loginAttempts = await this.authRepository.getLoginAttempts(
+      user._id.toString(),
+    );
     if (loginAttempts && parseInt(loginAttempts) > 5)
       throw new UnauthorizedException(
         'Account temporarily banned, try again later',
       );
 
     if (otp !== code) {
-      await this.authRepository.incrementLoginAttempts(user._id);
+      await this.authRepository.incrementLoginAttempts(user._id.toString());
       throw new UnauthorizedException('Invalid credentials');
     }
 
@@ -208,13 +213,8 @@ export class AuthService {
     return this.generateTokens(user._id);
   }
 
-  async rotateToken(userId: Types.ObjectId, jti: string) {
-    const user = await this.userRepository.findById(userId);
-
-    if (!user) throw new NotFoundException('Account does not exist');
-
+  rotateToken(user: User, jti: string) {
     const { accessToken: newAccessToken } = this.generateTokens(user._id, jti);
-
     return newAccessToken;
   }
 
@@ -224,7 +224,7 @@ export class AuthService {
     if (!user) return;
 
     const token = randomBytes(32).toString('hex');
-    await this.authRepository.setPasswordResetToken(token, user._id);
+    await this.authRepository.setPasswordResetToken(token, user._id.toString());
     await this.mailService.sendPasswordResetEmail(
       user.email,
       `${verificationRedirectUrl}/${token}`,
@@ -242,13 +242,21 @@ export class AuthService {
       new_password,
       this.configService.saltRounds,
     );
-    await this.userRepository.updatePassword(
-      new Types.ObjectId(userId),
-      hashedPassword,
-    );
+    await this.userRepository.updatePassword(userId, hashedPassword);
   }
 
   async blacklistToken(jti: string) {
     await this.authRepository.blacklistToken(jti);
+  }
+
+  // note to self: AuthModule deeply depends on UserModule while
+  // UserModule depending on AuthModule is just a side-effect
+  // it is better to set up this "something happened, react to it"
+  // than to use forwardRef();
+  // Auth subscribes to these 2 events and blacklists the token.
+  @OnEvent('user.deleted')
+  @OnEvent('user.password-changed')
+  async handleTokenInvalidation(payload: { jti: string }) {
+    await this.blacklistToken(payload.jti);
   }
 }
