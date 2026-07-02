@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
 import { User } from '../../user/entities/user.entity';
 import { CreationStatusEnum } from '../../../common/enums/creation-status.enum';
+import { Product } from '../../product/entities/product.entity';
 
 @Schema({
   timestamps: true,
@@ -17,6 +18,13 @@ export class Review {
     ref: User.name,
   })
   author!: Types.ObjectId;
+
+  @Prop({
+    type: Types.ObjectId,
+    required: true,
+    ref: Product.name,
+  })
+  product!: Types.ObjectId;
 
   @Prop({
     type: Number,
