@@ -8,6 +8,7 @@ import {
   Delete,
   UnprocessableEntityException,
   UseGuards,
+  HttpCode,
 } from '@nestjs/common';
 import { SubcategoriesService } from './subcategory.service';
 import {
@@ -29,6 +30,7 @@ export class SubcategoriesController {
     private readonly r2BucketService: R2BucketService,
   ) {}
 
+  @HttpCode(201)
   @Roles(UserRoleEnum.Admin)
   @UseGuards(RolesGuard)
   @Post()
@@ -46,6 +48,7 @@ export class SubcategoriesController {
     return { subcategory, uploadUrl };
   }
 
+  @HttpCode(201)
   @Roles(UserRoleEnum.Admin)
   @UseGuards(RolesGuard)
   @Post(':id/confirm')
@@ -86,6 +89,7 @@ export class SubcategoriesController {
     return this.subcategoriesService.update(id, updateSubcategoryDto);
   }
 
+  @HttpCode(204)
   @Roles(UserRoleEnum.Admin)
   @UseGuards(RolesGuard)
   @Delete(':id')

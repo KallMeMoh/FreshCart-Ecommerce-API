@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   Param,
   Patch,
   Post,
@@ -18,6 +19,7 @@ import { ReviewsService } from './review.service';
 export class ReviewsController {
   constructor(private readonly reviewsService: ReviewsService) {}
 
+  @HttpCode(201)
   @Post()
   create(@Body() createReviewDto: CreateReviewDto) {
     return this.reviewsService.create(createReviewDto);
@@ -38,6 +40,7 @@ export class ReviewsController {
     return this.reviewsService.update(+id, updateReviewDto);
   }
 
+  @HttpCode(204)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.reviewsService.remove(+id);

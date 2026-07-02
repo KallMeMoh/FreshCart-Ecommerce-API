@@ -10,6 +10,7 @@ import {
   Query,
   ParseEnumPipe,
   UseGuards,
+  HttpCode,
 } from '@nestjs/common';
 import { UsersService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -98,6 +99,7 @@ export class UsersController {
     return { message: 'Password updated successfully' };
   }
 
+  @HttpCode(204)
   @Delete(':id')
   deleteAccount(@ExtractUser() user: User, @ExtractTokenId() tokenId: string) {
     return this.usersService.delete(user._id.toString(), tokenId);

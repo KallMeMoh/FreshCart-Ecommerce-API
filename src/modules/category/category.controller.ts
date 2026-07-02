@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   Param,
   Patch,
   Post,
@@ -26,6 +27,7 @@ export class CategoriesController {
     private readonly r2BucketService: R2BucketService,
   ) {}
 
+  @HttpCode(201)
   @Roles(UserRoleEnum.Admin)
   @UseGuards(RolesGuard)
   @Post()
@@ -43,6 +45,7 @@ export class CategoriesController {
     return { category, uploadUrl };
   }
 
+  @HttpCode(201)
   @Roles(UserRoleEnum.Admin)
   @UseGuards(RolesGuard)
   @Post(':id/confirm')
@@ -83,6 +86,7 @@ export class CategoriesController {
     return this.categoriesService.update(id, updateCategoryDto);
   }
 
+  @HttpCode(204)
   @Roles(UserRoleEnum.Admin)
   @UseGuards(RolesGuard)
   @Delete(':id')

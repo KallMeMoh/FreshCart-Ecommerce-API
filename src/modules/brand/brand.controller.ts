@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   Param,
   Patch,
   Post,
@@ -26,6 +27,7 @@ export class BrandsController {
     private readonly r2BucketService: R2BucketService,
   ) {}
 
+  @HttpCode(201)
   @Roles(UserRoleEnum.Admin)
   @UseGuards(RolesGuard)
   @Post()
@@ -43,6 +45,7 @@ export class BrandsController {
     return { brand, uploadUrl };
   }
 
+  @HttpCode(201)
   @Roles(UserRoleEnum.Admin)
   @UseGuards(RolesGuard)
   @Post(':id/confirm')
@@ -79,6 +82,7 @@ export class BrandsController {
     return this.brandsService.update(id, updateBrandDto);
   }
 
+  @HttpCode(204)
   @Roles(UserRoleEnum.Admin)
   @UseGuards(RolesGuard)
   @Delete(':id')
