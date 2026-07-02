@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { CreationStatusEnum } from '../../common/enums/creation-status.enum';
 import { R2BucketService } from '../bucket/bucket.service';
-import { CategoryService } from './category.service';
+import { CategoriesService } from './category.service';
 import { CreateCategoryDto, UpdateCategoryDto } from './dto/category.dto';
 import { AccessTokenGuard } from '../../common/guards/access-toke.guard';
 import { UserRoleEnum } from '../user/enums/user-role.enum';
@@ -19,10 +19,10 @@ import { RolesGuard } from '../../common/guards/user-roles.guard';
 import { Roles } from '../../common/decorators/roles';
 
 @UseGuards(AccessTokenGuard)
-@Controller('category')
-export class CategoryController {
+@Controller('categories')
+export class CategoriesController {
   constructor(
-    private readonly categoryService: CategoryService,
+    private readonly categoryService: CategoriesService,
     private readonly r2BucketService: R2BucketService,
   ) {}
 

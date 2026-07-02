@@ -11,7 +11,7 @@ import {
 import { ConfigService } from '../config/config.service';
 import { MailService } from '../mail/mail.service';
 import { UserRoleEnum } from '../user/enums/user-role.enum';
-import { UserRepository } from '../user/user.repository';
+import { UsersRepository } from '../user/user.repository';
 import { AuthRepository } from './auth.repository';
 import { LoginDto } from './dto/login.dto';
 import { SignupDto } from './dto/signup.dto';
@@ -31,7 +31,7 @@ export class AuthService {
 
   constructor(
     private readonly authRepository: AuthRepository,
-    private readonly userRepository: UserRepository,
+    private readonly userRepository: UsersRepository,
     private readonly jwtService: JwtService,
     private readonly mailService: MailService,
     private readonly configService: ConfigService,

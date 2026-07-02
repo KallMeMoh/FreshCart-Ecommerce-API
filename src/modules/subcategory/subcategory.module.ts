@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Subcategory, SubcategorySchema } from './entities/subcategory.entity';
-import { SubcategoryController } from './subcategory.controller';
-import { SubcategoryService } from './subcategory.service';
-import { SubcategoryRepository } from './subcategory.repository';
+import { SubcategoriesController } from './subcategory.controller';
+import { SubcategoriesService } from './subcategory.service';
+import { SubcategoriesRepository } from './subcategory.repository';
 
 @Module({
   imports: [
@@ -11,7 +11,7 @@ import { SubcategoryRepository } from './subcategory.repository';
       { name: Subcategory.name, schema: SubcategorySchema },
     ]),
   ],
-  controllers: [SubcategoryController],
-  providers: [SubcategoryService, SubcategoryRepository],
+  controllers: [SubcategoriesController],
+  providers: [SubcategoriesService, SubcategoriesRepository],
 })
-export class SubcategoryModule {}
+export class SubcategoriesModule {}

@@ -6,12 +6,12 @@ import {
 import { randomUUID } from 'node:crypto';
 import { slugify } from 'transliteration';
 import { CreationStatusEnum } from '../../common/enums/creation-status.enum';
-import { BrandRepository } from './brand.repository';
+import { BrandsRepository } from './brand.repository';
 import { CreateBrandDto, UpdateBrandDto } from './dto/brand.dto';
 
 @Injectable()
-export class BrandService {
-  constructor(private readonly brandRepository: BrandRepository) {}
+export class BrandsService {
+  constructor(private readonly brandsRepository: BrandsRepository) {}
 
   async create({ name, logo_mimetype }: CreateBrandDto) {
     let key: string | null = null;
@@ -20,7 +20,7 @@ export class BrandService {
       key = `brand/${Date.now()}_${randomUUID()}.${logo_mimetype.split('/')[1]}`;
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { __v, ...brand } = await this.brandRepository.create({
+    const { __v, ...brand } = await this.brandsRepository.create({
       name,
       slug: slugify(name, { separator: '-' }),
       logoKey: key,
@@ -33,7 +33,7 @@ export class BrandService {
   }
 
   async confirmBrandCreation(brandId: string) {
-    const brand = await this.brandRepository.findById(brandId);
+    const brand = await this.brandsRepository.findById(brandId);
     if (!brand) throw new NotFoundException("Brand doesn't exist");
 
     if (brand.status === CreationStatusEnum.Published)
@@ -43,18 +43,18 @@ export class BrandService {
   }
 
   findAll() {
-    return this.brandRepository.findAll();
+    return this.brandsRepository.findAll();
   }
 
   findOne(slug: string) {
-    return this.brandRepository.findBySlug(slug);
+    return this.brandsRepository.findBySlug(slug);
   }
 
   update(slug: string, updateBrandDto: UpdateBrandDto) {
-    return this.brandRepository.updateOne(slug, updateBrandDto);
+    return this.brandsRepository.updateOne(slug, updateBrandDto);
   }
 
   remove(id: string) {
-    return this.brandRepository.deleteOne(id);
+    return this.brandsRepository.deleteOne(id);
   }
 }

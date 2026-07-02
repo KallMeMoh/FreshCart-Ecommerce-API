@@ -15,14 +15,14 @@ import { AccessTokenGuard } from '../../common/guards/access-toke.guard';
 import { RolesGuard } from '../../common/guards/user-roles.guard';
 import { R2BucketService } from '../bucket/bucket.service';
 import { UserRoleEnum } from '../user/enums/user-role.enum';
-import { BrandService } from './brand.service';
+import { BrandsService } from './brand.service';
 import { CreateBrandDto, UpdateBrandDto } from './dto/brand.dto';
 
 @UseGuards(AccessTokenGuard)
-@Controller('brand')
-export class BrandController {
+@Controller('brands')
+export class BrandsController {
   constructor(
-    private readonly brandService: BrandService,
+    private readonly brandService: BrandsService,
     private readonly r2BucketService: R2BucketService,
   ) {}
 

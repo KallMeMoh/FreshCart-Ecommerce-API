@@ -9,7 +9,7 @@ import {
   UnprocessableEntityException,
   UseGuards,
 } from '@nestjs/common';
-import { SubcategoryService } from './subcategory.service';
+import { SubcategoriesService } from './subcategory.service';
 import {
   CreateSubcategoryDto,
   UpdateSubcategoryDto,
@@ -22,10 +22,10 @@ import { RolesGuard } from '../../common/guards/user-roles.guard';
 import { Roles } from '../../common/decorators/roles';
 
 @UseGuards(AccessTokenGuard)
-@Controller('subcategory')
-export class SubcategoryController {
+@Controller('subcategories')
+export class SubcategoriesController {
   constructor(
-    private readonly subcategoryService: SubcategoryService,
+    private readonly subcategoryService: SubcategoriesService,
     private readonly r2BucketService: R2BucketService,
   ) {}
 

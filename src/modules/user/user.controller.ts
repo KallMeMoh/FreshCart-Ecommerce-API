@@ -11,7 +11,7 @@ import {
   ParseEnumPipe,
   UseGuards,
 } from '@nestjs/common';
-import { UserService } from './user.service';
+import { UsersService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ExtractUser } from '../../common/decorators/extract-user';
 import { User } from './entities/user.entity';
@@ -23,10 +23,10 @@ import { AllowedPictureMimeType } from '../../common/enums/picture-mimetype.enum
 import { AccessTokenGuard } from '../../common/guards/access-toke.guard';
 
 @UseGuards(AccessTokenGuard)
-@Controller('user')
-export class UserController {
+@Controller('users')
+export class UsersController {
   constructor(
-    private readonly userService: UserService,
+    private readonly userService: UsersService,
     private readonly r2BucketService: R2BucketService,
     private readonly mailService: MailService,
   ) {}

@@ -6,12 +6,12 @@ import {
 import { randomUUID } from 'node:crypto';
 import { slugify } from 'transliteration';
 import { CreationStatusEnum } from '../../common/enums/creation-status.enum';
-import { CategoryRepository } from './category.repository';
+import { CategoriesRepository } from './category.repository';
 import { CreateCategoryDto, UpdateCategoryDto } from './dto/category.dto';
 
 @Injectable()
-export class CategoryService {
-  constructor(private readonly categoryRepository: CategoryRepository) {}
+export class CategoriesService {
+  constructor(private readonly categoriesRepository: CategoriesRepository) {}
 
   async create({ name, logo_mimetype }: CreateCategoryDto) {
     let key: string | null = null;
@@ -20,7 +20,7 @@ export class CategoryService {
       key = `category/${Date.now()}_${randomUUID()}.${logo_mimetype.split('/')[1]}`;
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { __v, ...category } = await this.categoryRepository.create({
+    const { __v, ...category } = await this.categoriesRepository.create({
       name,
       slug: slugify(name, { separator: '-' }),
       logoKey: key,
@@ -33,7 +33,7 @@ export class CategoryService {
   }
 
   async confirmCategoryCreation(categoryId: string) {
-    const category = await this.categoryRepository.findById(categoryId);
+    const category = await this.categoriesRepository.findById(categoryId);
     if (!category) throw new NotFoundException("Category doesn't exist");
 
     if (category.status === CreationStatusEnum.Published)
@@ -43,18 +43,18 @@ export class CategoryService {
   }
 
   findAll() {
-    return this.categoryRepository.findAll();
+    return this.categoriesRepository.findAll();
   }
 
   findOne(slug: string) {
-    return this.categoryRepository.findBySlug(slug);
+    return this.categoriesRepository.findBySlug(slug);
   }
 
   update(slug: string, updateCategoryDto: UpdateCategoryDto) {
-    return this.categoryRepository.updateOne(slug, updateCategoryDto);
+    return this.categoriesRepository.updateOne(slug, updateCategoryDto);
   }
 
   remove(id: string) {
-    return this.categoryRepository.deleteOne(id);
+    return this.categoriesRepository.deleteOne(id);
   }
 }

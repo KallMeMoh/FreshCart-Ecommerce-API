@@ -11,11 +11,13 @@ import {
   CreateSubcategoryDto,
   UpdateSubcategoryDto,
 } from './dto/subcategory.dto';
-import { SubcategoryRepository } from './subcategory.repository';
+import { SubcategoriesRepository } from './subcategory.repository';
 
 @Injectable()
-export class SubcategoryService {
-  constructor(private readonly subcategoryRepository: SubcategoryRepository) {}
+export class SubcategoriesService {
+  constructor(
+    private readonly subcategoriesRepository: SubcategoriesRepository,
+  ) {}
 
   async create({ name, logo_mimetype, categoryId }: CreateSubcategoryDto) {
     let key: string | null = null;
@@ -24,7 +26,7 @@ export class SubcategoryService {
       key = `subcategory/${Date.now()}_${randomUUID()}.${logo_mimetype.split('/')[1]}`;
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { __v, ...subcategory } = await this.subcategoryRepository.create({
+    const { __v, ...subcategory } = await this.subcategoriesRepository.create({
       name,
       slug: slugify(name, { separator: '-' }),
       logoKey: key,
@@ -39,7 +41,7 @@ export class SubcategoryService {
 
   async confirmSubcategoryCreation(subcategoryId: string) {
     const subcategory =
-      await this.subcategoryRepository.findById(subcategoryId);
+      await this.subcategoriesRepository.findById(subcategoryId);
     if (!subcategory) throw new NotFoundException("Subcategory doesn't exist");
 
     if (subcategory.status === CreationStatusEnum.Published)
@@ -49,18 +51,18 @@ export class SubcategoryService {
   }
 
   findAll() {
-    return this.subcategoryRepository.findAll();
+    return this.subcategoriesRepository.findAll();
   }
 
   findOne(slug: string) {
-    return this.subcategoryRepository.findBySlug(slug);
+    return this.subcategoriesRepository.findBySlug(slug);
   }
 
   update(slug: string, updateSubcategoryDto: UpdateSubcategoryDto) {
-    return this.subcategoryRepository.updateOne(slug, updateSubcategoryDto);
+    return this.subcategoriesRepository.updateOne(slug, updateSubcategoryDto);
   }
 
   remove(id: string) {
-    return this.subcategoryRepository.deleteOne(id);
+    return this.subcategoriesRepository.deleteOne(id);
   }
 }

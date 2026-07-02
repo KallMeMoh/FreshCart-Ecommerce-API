@@ -11,12 +11,12 @@ import {
 import { AccessTokenGuard } from '../../common/guards/access-toke.guard';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
-import { ReviewService } from './review.service';
+import { ReviewsService } from './review.service';
 
 @UseGuards(AccessTokenGuard)
-@Controller('review')
-export class ReviewController {
-  constructor(private readonly reviewService: ReviewService) {}
+@Controller('products/:id/reviews')
+export class ReviewsController {
+  constructor(private readonly reviewService: ReviewsService) {}
 
   @Post()
   create(@Body() createReviewDto: CreateReviewDto) {

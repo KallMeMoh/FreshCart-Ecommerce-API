@@ -8,7 +8,7 @@ import {
   Delete,
   UseGuards,
 } from '@nestjs/common';
-import { ProductService } from './product.service';
+import { ProductsService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { AccessTokenGuard } from '../../common/guards/access-toke.guard';
@@ -17,9 +17,9 @@ import { Roles } from '../../common/decorators/roles';
 import { RolesGuard } from '../../common/guards/user-roles.guard';
 
 @UseGuards(AccessTokenGuard)
-@Controller('product')
-export class ProductController {
-  constructor(private readonly productService: ProductService) {}
+@Controller('products')
+export class ProductsController {
+  constructor(private readonly productService: ProductsService) {}
 
   @Roles(UserRoleEnum.Admin)
   @UseGuards(RolesGuard)

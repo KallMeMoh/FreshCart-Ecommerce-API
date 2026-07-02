@@ -13,7 +13,7 @@ import { Redis } from 'ioredis';
 import { AuthProviderEnum } from '../auth/enums/auth-provider.enum';
 
 @Injectable()
-export class UserRepository {
+export class UsersRepository {
   constructor(
     @InjectRedis() private readonly redisClient: Redis,
     @InjectModel(User.name) private readonly userModel: Model<User>,

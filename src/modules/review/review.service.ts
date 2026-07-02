@@ -1,9 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
+import { ReviewsRepository } from './review.repository';
 
 @Injectable()
-export class ReviewService {
+export class ReviewsService {
+  constructor(private readonly reviewsRepository: ReviewsRepository) {}
+
   create(createReviewDto: CreateReviewDto) {
     return 'This action adds a new review';
   }
