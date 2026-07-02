@@ -10,7 +10,10 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { SubcategoryService } from './subcategory.service';
-import { SubcategoryDto } from './dto/subcategory.dto';
+import {
+  CreateSubcategoryDto,
+  UpdateSubcategoryDto,
+} from './dto/subcategory.dto';
 import { R2BucketService } from '../bucket/bucket.service';
 import { CreationStatusEnum } from '../../common/enums/creation-status.enum';
 import { AccessTokenGuard } from '../../common/guards/access-toke.guard';
@@ -29,7 +32,7 @@ export class SubcategoryController {
   @Roles(UserRoleEnum.Admin)
   @UseGuards(RolesGuard)
   @Post()
-  async create(@Body() createSubcategoryDto: SubcategoryDto) {
+  async create(@Body() createSubcategoryDto: CreateSubcategoryDto) {
     const { logoKey, ...subcategory } =
       await this.subcategoryService.create(createSubcategoryDto);
 
@@ -78,7 +81,7 @@ export class SubcategoryController {
   @Patch(':id')
   update(
     @Param('id') id: string,
-    @Body() updateSubcategoryDto: Partial<SubcategoryDto>,
+    @Body() updateSubcategoryDto: UpdateSubcategoryDto,
   ) {
     return this.subcategoryService.update(id, updateSubcategoryDto);
   }

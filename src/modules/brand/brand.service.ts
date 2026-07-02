@@ -4,16 +4,16 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
-import { BrandRepository } from './brand.repository';
-import { BrandDto } from './dto/brand.dto';
 import { slugify } from 'transliteration';
 import { CreationStatusEnum } from '../../common/enums/creation-status.enum';
+import { BrandRepository } from './brand.repository';
+import { CreateBrandDto, UpdateBrandDto } from './dto/brand.dto';
 
 @Injectable()
 export class BrandService {
   constructor(private readonly brandRepository: BrandRepository) {}
 
-  async create({ name, logo_mimetype }: BrandDto) {
+  async create({ name, logo_mimetype }: CreateBrandDto) {
     let key: string | null = null;
 
     if (logo_mimetype)
@@ -50,7 +50,7 @@ export class BrandService {
     return this.brandRepository.findBySlug(slug);
   }
 
-  update(slug: string, updateBrandDto: Partial<BrandDto>) {
+  update(slug: string, updateBrandDto: UpdateBrandDto) {
     return this.brandRepository.updateOne(slug, updateBrandDto);
   }
 

@@ -1,22 +1,22 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
   UnprocessableEntityException,
   UseGuards,
 } from '@nestjs/common';
-import { BrandService } from './brand.service';
-import { BrandDto } from './dto/brand.dto';
-import { R2BucketService } from '../bucket/bucket.service';
+import { Roles } from '../../common/decorators/roles';
 import { CreationStatusEnum } from '../../common/enums/creation-status.enum';
 import { AccessTokenGuard } from '../../common/guards/access-toke.guard';
 import { RolesGuard } from '../../common/guards/user-roles.guard';
-import { Roles } from '../../common/decorators/roles';
+import { R2BucketService } from '../bucket/bucket.service';
 import { UserRoleEnum } from '../user/enums/user-role.enum';
+import { BrandService } from './brand.service';
+import { CreateBrandDto, UpdateBrandDto } from './dto/brand.dto';
 
 @UseGuards(AccessTokenGuard)
 @Controller('brand')
@@ -29,7 +29,7 @@ export class BrandController {
   @Roles(UserRoleEnum.Admin)
   @UseGuards(RolesGuard)
   @Post()
-  async create(@Body() createBrandDto: BrandDto) {
+  async create(@Body() createBrandDto: CreateBrandDto) {
     const { logoKey, ...brand } =
       await this.brandService.create(createBrandDto);
 
@@ -75,7 +75,7 @@ export class BrandController {
   @Roles(UserRoleEnum.Admin)
   @UseGuards(RolesGuard)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateBrandDto: Partial<BrandDto>) {
+  update(@Param('id') id: string, @Body() updateBrandDto: UpdateBrandDto) {
     return this.brandService.update(id, updateBrandDto);
   }
 

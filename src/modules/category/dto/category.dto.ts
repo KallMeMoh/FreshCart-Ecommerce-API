@@ -8,8 +8,9 @@ import {
   MinLength,
 } from 'class-validator';
 import { AllowedPictureMimeType } from '../../../common/enums/picture-mimetype.enum';
+import { PartialType } from '@nestjs/mapped-types';
 
-export class CategoryDto {
+export class CreateCategoryDto {
   @Transform(({ value }: { value?: string }) => value?.trim())
   @IsString()
   @MinLength(3, { message: 'Name must be at least 3 characters' })
@@ -23,3 +24,5 @@ export class CategoryDto {
   @IsOptional()
   logo_mimetype?: AllowedPictureMimeType;
 }
+
+export class UpdateCategoryDto extends PartialType(CreateCategoryDto) {}

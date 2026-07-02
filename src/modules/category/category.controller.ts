@@ -12,7 +12,7 @@ import {
 import { CreationStatusEnum } from '../../common/enums/creation-status.enum';
 import { R2BucketService } from '../bucket/bucket.service';
 import { CategoryService } from './category.service';
-import { CategoryDto } from './dto/category.dto';
+import { CreateCategoryDto, UpdateCategoryDto } from './dto/category.dto';
 import { AccessTokenGuard } from '../../common/guards/access-toke.guard';
 import { UserRoleEnum } from '../user/enums/user-role.enum';
 import { RolesGuard } from '../../common/guards/user-roles.guard';
@@ -29,7 +29,7 @@ export class CategoryController {
   @Roles(UserRoleEnum.Admin)
   @UseGuards(RolesGuard)
   @Post()
-  async create(@Body() createCategoryDto: CategoryDto) {
+  async create(@Body() createCategoryDto: CreateCategoryDto) {
     const { logoKey, ...category } =
       await this.categoryService.create(createCategoryDto);
 
@@ -78,7 +78,7 @@ export class CategoryController {
   @Patch(':id')
   update(
     @Param('id') id: string,
-    @Body() updateCategoryDto: Partial<CategoryDto>,
+    @Body() updateCategoryDto: UpdateCategoryDto,
   ) {
     return this.categoryService.update(id, updateCategoryDto);
   }

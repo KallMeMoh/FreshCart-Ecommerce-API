@@ -7,14 +7,17 @@ import { randomUUID } from 'crypto';
 import { Types } from 'mongoose';
 import { slugify } from 'transliteration';
 import { CreationStatusEnum } from '../../common/enums/creation-status.enum';
-import { SubcategoryDto } from './dto/subcategory.dto';
+import {
+  CreateSubcategoryDto,
+  UpdateSubcategoryDto,
+} from './dto/subcategory.dto';
 import { SubcategoryRepository } from './subcategory.repository';
 
 @Injectable()
 export class SubcategoryService {
   constructor(private readonly subcategoryRepository: SubcategoryRepository) {}
 
-  async create({ name, logo_mimetype, categoryId }: SubcategoryDto) {
+  async create({ name, logo_mimetype, categoryId }: CreateSubcategoryDto) {
     let key: string | null = null;
 
     if (logo_mimetype)
@@ -53,7 +56,7 @@ export class SubcategoryService {
     return this.subcategoryRepository.findBySlug(slug);
   }
 
-  update(slug: string, updateSubcategoryDto: Partial<SubcategoryDto>) {
+  update(slug: string, updateSubcategoryDto: UpdateSubcategoryDto) {
     return this.subcategoryRepository.updateOne(slug, updateSubcategoryDto);
   }
 

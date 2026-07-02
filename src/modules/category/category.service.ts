@@ -7,13 +7,13 @@ import { randomUUID } from 'node:crypto';
 import { slugify } from 'transliteration';
 import { CreationStatusEnum } from '../../common/enums/creation-status.enum';
 import { CategoryRepository } from './category.repository';
-import { CategoryDto } from './dto/category.dto';
+import { CreateCategoryDto, UpdateCategoryDto } from './dto/category.dto';
 
 @Injectable()
 export class CategoryService {
   constructor(private readonly categoryRepository: CategoryRepository) {}
 
-  async create({ name, logo_mimetype }: CategoryDto) {
+  async create({ name, logo_mimetype }: CreateCategoryDto) {
     let key: string | null = null;
 
     if (logo_mimetype)
@@ -50,7 +50,7 @@ export class CategoryService {
     return this.categoryRepository.findBySlug(slug);
   }
 
-  update(slug: string, updateCategoryDto: Partial<CategoryDto>) {
+  update(slug: string, updateCategoryDto: UpdateCategoryDto) {
     return this.categoryRepository.updateOne(slug, updateCategoryDto);
   }
 
