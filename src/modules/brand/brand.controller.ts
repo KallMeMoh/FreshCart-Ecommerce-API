@@ -22,7 +22,7 @@ import { CreateBrandDto, UpdateBrandDto } from './dto/brand.dto';
 @Controller('brands')
 export class BrandsController {
   constructor(
-    private readonly brandService: BrandsService,
+    private readonly brandsService: BrandsService,
     private readonly r2BucketService: R2BucketService,
   ) {}
 
@@ -31,7 +31,7 @@ export class BrandsController {
   @Post()
   async create(@Body() createBrandDto: CreateBrandDto) {
     const { logoKey, ...brand } =
-      await this.brandService.create(createBrandDto);
+      await this.brandsService.create(createBrandDto);
 
     let uploadUrl: string | null = null;
     if (createBrandDto.logo_mimetype && logoKey)
@@ -47,7 +47,7 @@ export class BrandsController {
   @UseGuards(RolesGuard)
   @Post(':id/confirm')
   async confirmBrandCreation(@Param('id') brandId: string) {
-    const brand = await this.brandService.confirmBrandCreation(brandId);
+    const brand = await this.brandsService.confirmBrandCreation(brandId);
     if (!brand.logoKey) {
       brand.status = CreationStatusEnum.Published;
       await brand.save();
@@ -64,25 +64,25 @@ export class BrandsController {
 
   @Get()
   findAll() {
-    return this.brandService.findAll();
+    return this.brandsService.findAll();
   }
 
   @Get(':slug')
   findOne(@Param('slug') slug: string) {
-    return this.brandService.findOne(slug);
+    return this.brandsService.findOne(slug);
   }
 
   @Roles(UserRoleEnum.Admin)
   @UseGuards(RolesGuard)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateBrandDto: UpdateBrandDto) {
-    return this.brandService.update(id, updateBrandDto);
+    return this.brandsService.update(id, updateBrandDto);
   }
 
   @Roles(UserRoleEnum.Admin)
   @UseGuards(RolesGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.brandService.remove(id);
+    return this.brandsService.remove(id);
   }
 }

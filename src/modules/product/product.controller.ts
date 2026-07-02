@@ -19,36 +19,36 @@ import { RolesGuard } from '../../common/guards/user-roles.guard';
 @UseGuards(AccessTokenGuard)
 @Controller('products')
 export class ProductsController {
-  constructor(private readonly productService: ProductsService) {}
+  constructor(private readonly productsService: ProductsService) {}
 
   @Roles(UserRoleEnum.Admin)
   @UseGuards(RolesGuard)
   @Post()
   create(@Body() createProductDto: CreateProductDto) {
-    return this.productService.create(createProductDto);
+    return this.productsService.create(createProductDto);
   }
 
   @Get()
   findAll() {
-    return this.productService.findAll();
+    return this.productsService.findAll();
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.productService.findOne(+id);
+    return this.productsService.findOne(+id);
   }
 
   @Roles(UserRoleEnum.Admin)
   @UseGuards(RolesGuard)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
-    return this.productService.update(+id, updateProductDto);
+    return this.productsService.update(+id, updateProductDto);
   }
 
   @Roles(UserRoleEnum.Admin)
   @UseGuards(RolesGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.productService.remove(+id);
+    return this.productsService.remove(+id);
   }
 }

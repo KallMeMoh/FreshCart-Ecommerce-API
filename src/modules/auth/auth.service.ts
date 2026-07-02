@@ -31,7 +31,7 @@ export class AuthService {
 
   constructor(
     private readonly authRepository: AuthRepository,
-    private readonly userRepository: UsersRepository,
+    private readonly usersRepository: UsersRepository,
     private readonly jwtService: JwtService,
     private readonly mailService: MailService,
     private readonly configService: ConfigService,
@@ -66,12 +66,12 @@ export class AuthService {
     password,
     verificationRedirectUrl,
   }: SignupDto) {
-    const userExists = await this.userRepository.existsByEmail(email);
+    const userExists = await this.usersRepository.existsByEmail(email);
     if (userExists) throw new ConflictException('Email already in use');
 
     const hashedPassword = await hash(password, this.configService.saltRounds);
 
-    const user = await this.userRepository.create({
+    const user = await this.usersRepository.create({
       username,
       email,
       avatarKey: null,
@@ -85,7 +85,7 @@ export class AuthService {
     });
 
     const token = randomBytes(32).toString('hex');
-    await this.userRepository.setVerificationCode(user._id.toString(), token);
+    await this.usersRepository.setVerificationCode(user._id.toString(), token);
 
     this.mailService
       .sendVerificationEmail(user.email, `${verificationRedirectUrl}/${token}`)
@@ -93,7 +93,7 @@ export class AuthService {
   }
 
   async login({ email, password }: LoginDto) {
-    const user = await this.userRepository.findByEmail(email);
+    const user = await this.usersRepository.findByEmail(email);
     if (!user) throw new NotFoundException('Account does not exist');
 
     if (user.provider !== AuthProviderEnum.System)
@@ -140,7 +140,7 @@ export class AuthService {
     });
 
     const [user, code] = await Promise.all([
-      this.userRepository.findById(payload.sub),
+      this.usersRepository.findById(payload.sub),
       this.authRepository.get2FACode(payload.sub),
     ]);
 
@@ -173,10 +173,10 @@ export class AuthService {
     if (!payload) throw new BadRequestException();
     const { given_name, email, picture, email_verified } = payload;
 
-    const user = await this.userRepository.findByEmail(email ?? '');
+    const user = await this.usersRepository.findByEmail(email ?? '');
     if (user) throw new ConflictException('Account already exists');
 
-    await this.userRepository.create({
+    await this.usersRepository.create({
       username: given_name!,
       email: email!,
       verified: email_verified ?? false,
@@ -196,7 +196,7 @@ export class AuthService {
     const payload = ticket.getPayload();
     if (!payload) throw new BadRequestException();
 
-    const user = await this.userRepository.findByEmailAndProvider(
+    const user = await this.usersRepository.findByEmailAndProvider(
       payload.email ?? '',
       AuthProviderEnum.Google,
     );
@@ -217,7 +217,7 @@ export class AuthService {
   }
 
   async resetPassword({ email, verificationRedirectUrl }: ForgotPasswordDto) {
-    const user = await this.userRepository.findByEmail(email);
+    const user = await this.usersRepository.findByEmail(email);
 
     if (!user) return;
 
@@ -240,7 +240,7 @@ export class AuthService {
       new_password,
       this.configService.saltRounds,
     );
-    await this.userRepository.updatePassword(userId, hashedPassword);
+    await this.usersRepository.updatePassword(userId, hashedPassword);
   }
 
   async blacklistToken(jti: string) {

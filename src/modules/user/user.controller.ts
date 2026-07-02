@@ -26,14 +26,14 @@ import { AccessTokenGuard } from '../../common/guards/access-toke.guard';
 @Controller('users')
 export class UsersController {
   constructor(
-    private readonly userService: UsersService,
+    private readonly usersService: UsersService,
     private readonly r2BucketService: R2BucketService,
     private readonly mailService: MailService,
   ) {}
 
   @Get('id')
   async getProfile(@Param('id') id: string) {
-    const { avatarKey, ...user } = await this.userService.findOne(id);
+    const { avatarKey, ...user } = await this.usersService.findOne(id);
     const avatar = avatarKey
       ? this.r2BucketService.generateReadUrl(avatarKey)
       : null;
@@ -52,27 +52,27 @@ export class UsersController {
 
   @Post('2fa/enable')
   async enable2FA(@ExtractUser() user: User) {
-    const code = await this.userService.request2FAActivation(user);
+    const code = await this.usersService.request2FAActivation(user);
     await this.mailService.send2FAEmail(user.email, code);
     return { message: 'Please check your inbox' };
   }
 
   @Post('2fa/verify')
   async verify2FA(@ExtractUser() user: User, @Body() otp: string) {
-    await this.userService.activate2FA(user, otp);
+    await this.usersService.activate2FA(user, otp);
     return { message: 'Account has been verified successfully' };
   }
 
   @Post('verification/resend')
   async reRequestVerification(@ExtractUser() user: User) {
-    const code = await this.userService.requestVerificationCode(user);
+    const code = await this.usersService.requestVerificationCode(user);
     await this.mailService.send2FAEmail(user.email, code);
     return { message: 'OTP code emailed successfully' };
   }
 
   @Post('verify')
   async completeVerification(@ExtractUser() user: User, @Body() otp: string) {
-    await this.userService.verifyUserAccount(user, otp);
+    await this.usersService.verifyUserAccount(user, otp);
     return { message: 'Account has been verified successfully' };
   }
 
@@ -81,7 +81,7 @@ export class UsersController {
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
   ) {
-    return await this.userService.updateOne(id, updateUserDto);
+    return await this.usersService.updateOne(id, updateUserDto);
   }
 
   @Post('update-password')
@@ -90,12 +90,16 @@ export class UsersController {
     @ExtractTokenId() tokenId: string,
     @Body() updatePasswordDto: UpdatePasswordDto,
   ) {
-    await this.userService.updateUserPassword(user, tokenId, updatePasswordDto);
+    await this.usersService.updateUserPassword(
+      user,
+      tokenId,
+      updatePasswordDto,
+    );
     return { message: 'Password updated successfully' };
   }
 
   @Delete(':id')
   deleteAccount(@ExtractUser() user: User, @ExtractTokenId() tokenId: string) {
-    return this.userService.delete(user._id.toString(), tokenId);
+    return this.usersService.delete(user._id.toString(), tokenId);
   }
 }

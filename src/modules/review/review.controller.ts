@@ -16,30 +16,30 @@ import { ReviewsService } from './review.service';
 @UseGuards(AccessTokenGuard)
 @Controller('products/:id/reviews')
 export class ReviewsController {
-  constructor(private readonly reviewService: ReviewsService) {}
+  constructor(private readonly reviewsService: ReviewsService) {}
 
   @Post()
   create(@Body() createReviewDto: CreateReviewDto) {
-    return this.reviewService.create(createReviewDto);
+    return this.reviewsService.create(createReviewDto);
   }
 
   @Get()
   findAll() {
-    return this.reviewService.findAll();
+    return this.reviewsService.findAll();
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.reviewService.findOne(+id);
+    return this.reviewsService.findOne(+id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateReviewDto: UpdateReviewDto) {
-    return this.reviewService.update(+id, updateReviewDto);
+    return this.reviewsService.update(+id, updateReviewDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.reviewService.remove(+id);
+    return this.reviewsService.remove(+id);
   }
 }

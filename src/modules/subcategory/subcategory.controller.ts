@@ -25,7 +25,7 @@ import { Roles } from '../../common/decorators/roles';
 @Controller('subcategories')
 export class SubcategoriesController {
   constructor(
-    private readonly subcategoryService: SubcategoriesService,
+    private readonly subcategoriesService: SubcategoriesService,
     private readonly r2BucketService: R2BucketService,
   ) {}
 
@@ -34,7 +34,7 @@ export class SubcategoriesController {
   @Post()
   async create(@Body() createSubcategoryDto: CreateSubcategoryDto) {
     const { logoKey, ...subcategory } =
-      await this.subcategoryService.create(createSubcategoryDto);
+      await this.subcategoriesService.create(createSubcategoryDto);
 
     let uploadUrl: string | null = null;
     if (createSubcategoryDto.logo_mimetype && logoKey)
@@ -51,7 +51,7 @@ export class SubcategoriesController {
   @Post(':id/confirm')
   async confirmSubcategoryCreation(@Param('id') subcategoryId: string) {
     const subcategory =
-      await this.subcategoryService.confirmSubcategoryCreation(subcategoryId);
+      await this.subcategoriesService.confirmSubcategoryCreation(subcategoryId);
     if (!subcategory.logoKey) {
       subcategory.status = CreationStatusEnum.Published;
       await subcategory.save();
@@ -68,12 +68,12 @@ export class SubcategoriesController {
 
   @Get()
   findAll() {
-    return this.subcategoryService.findAll();
+    return this.subcategoriesService.findAll();
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.subcategoryService.findOne(id);
+    return this.subcategoriesService.findOne(id);
   }
 
   @Roles(UserRoleEnum.Admin)
@@ -83,13 +83,13 @@ export class SubcategoriesController {
     @Param('id') id: string,
     @Body() updateSubcategoryDto: UpdateSubcategoryDto,
   ) {
-    return this.subcategoryService.update(id, updateSubcategoryDto);
+    return this.subcategoriesService.update(id, updateSubcategoryDto);
   }
 
   @Roles(UserRoleEnum.Admin)
   @UseGuards(RolesGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.subcategoryService.remove(id);
+    return this.subcategoriesService.remove(id);
   }
 }

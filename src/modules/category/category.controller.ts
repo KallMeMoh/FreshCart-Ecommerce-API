@@ -22,7 +22,7 @@ import { Roles } from '../../common/decorators/roles';
 @Controller('categories')
 export class CategoriesController {
   constructor(
-    private readonly categoryService: CategoriesService,
+    private readonly categoriesService: CategoriesService,
     private readonly r2BucketService: R2BucketService,
   ) {}
 
@@ -31,7 +31,7 @@ export class CategoriesController {
   @Post()
   async create(@Body() createCategoryDto: CreateCategoryDto) {
     const { logoKey, ...category } =
-      await this.categoryService.create(createCategoryDto);
+      await this.categoriesService.create(createCategoryDto);
 
     let uploadUrl: string | null = null;
     if (createCategoryDto.logo_mimetype && logoKey)
@@ -48,7 +48,7 @@ export class CategoriesController {
   @Post(':id/confirm')
   async confirmCategoryCreation(@Param('id') categoryId: string) {
     const category =
-      await this.categoryService.confirmCategoryCreation(categoryId);
+      await this.categoriesService.confirmCategoryCreation(categoryId);
     if (!category.logoKey) {
       category.status = CreationStatusEnum.Published;
       await category.save();
@@ -65,12 +65,12 @@ export class CategoriesController {
 
   @Get()
   findAll() {
-    return this.categoryService.findAll();
+    return this.categoriesService.findAll();
   }
 
   @Get(':slug')
   findOne(@Param('slug') slug: string) {
-    return this.categoryService.findOne(slug);
+    return this.categoriesService.findOne(slug);
   }
 
   @Roles(UserRoleEnum.Admin)
@@ -80,13 +80,13 @@ export class CategoriesController {
     @Param('id') id: string,
     @Body() updateCategoryDto: UpdateCategoryDto,
   ) {
-    return this.categoryService.update(id, updateCategoryDto);
+    return this.categoriesService.update(id, updateCategoryDto);
   }
 
   @Roles(UserRoleEnum.Admin)
   @UseGuards(RolesGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.categoryService.remove(id);
+    return this.categoriesService.remove(id);
   }
 }
