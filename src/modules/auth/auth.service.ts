@@ -16,7 +16,6 @@ import { AuthRepository } from './auth.repository';
 import { LoginDto } from './dto/login.dto';
 import { SignupDto } from './dto/signup.dto';
 import { AuthProviderEnum } from './enums/auth-provider.enum';
-import { JwtService } from '@nestjs/jwt';
 import { Types } from 'mongoose';
 import { LoginConfirmationDto } from './dto/login-confirmation.dto';
 import { OAuth2Client } from 'google-auth-library';
@@ -24,6 +23,7 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { User } from '../user/entities/user.entity';
 import { OnEvent } from '@nestjs/event-emitter';
+import { JwtService } from '../token/jwt.service';
 
 @Injectable()
 export class AuthService {

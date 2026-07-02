@@ -7,12 +7,18 @@ import {
   Param,
   Delete,
   UnprocessableEntityException,
+  UseGuards,
 } from '@nestjs/common';
 import { BrandService } from './brand.service';
 import { BrandDto } from './dto/brand.dto';
 import { R2BucketService } from '../bucket/bucket.service';
 import { CreationStatusEnum } from '../../common/enums/creation-status.enum';
+import { AccessTokenGuard } from '../../common/guards/access-toke.guard';
+import { RolesGuard } from '../../common/guards/user-roles.guard';
+import { Roles } from '../../common/decorators/roles';
+import { UserRoleEnum } from '../user/enums/user-role.enum';
 
+@UseGuards(AccessTokenGuard)
 @Controller('brand')
 export class BrandController {
   constructor(
@@ -20,6 +26,8 @@ export class BrandController {
     private readonly r2BucketService: R2BucketService,
   ) {}
 
+  @Roles(UserRoleEnum.Admin)
+  @UseGuards(RolesGuard)
   @Post()
   async create(@Body() createBrandDto: BrandDto) {
     const { logoKey, ...brand } =
@@ -35,6 +43,8 @@ export class BrandController {
     return { brand, uploadUrl };
   }
 
+  @Roles(UserRoleEnum.Admin)
+  @UseGuards(RolesGuard)
   @Post(':id/confirm')
   async confirmBrandCreation(@Param('id') brandId: string) {
     const brand = await this.brandService.confirmBrandCreation(brandId);
@@ -62,11 +72,15 @@ export class BrandController {
     return this.brandService.findOne(slug);
   }
 
+  @Roles(UserRoleEnum.Admin)
+  @UseGuards(RolesGuard)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateBrandDto: Partial<BrandDto>) {
     return this.brandService.update(id, updateBrandDto);
   }
 
+  @Roles(UserRoleEnum.Admin)
+  @UseGuards(RolesGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.brandService.remove(id);

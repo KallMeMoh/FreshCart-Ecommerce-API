@@ -1,10 +1,11 @@
-import { User } from '../modules/user/entities/user.entity';
+import { UserRoleEnum } from '../modules/user/enums/user-role.enum';
 
 declare global {
   namespace Express {
     interface Request {
-      user?: User;
-      tokenId?: string;
+      userId: string | undefined;
+      userRole: UserRoleEnum | undefined;
+      tokenId: string | undefined;
     }
   }
 }

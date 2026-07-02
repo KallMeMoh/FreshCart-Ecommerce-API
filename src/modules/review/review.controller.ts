@@ -1,8 +1,19 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { ReviewService } from './review.service';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
+import { AccessTokenGuard } from '../../common/guards/access-toke.guard';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
+import { ReviewService } from './review.service';
 
+@UseGuards(AccessTokenGuard)
 @Controller('review')
 export class ReviewController {
   constructor(private readonly reviewService: ReviewService) {}

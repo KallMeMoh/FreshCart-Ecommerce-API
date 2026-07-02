@@ -15,7 +15,7 @@ import type { Request } from 'express';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { AccessTokenGuard } from '../../common/guards/access-toke.guard';
-import { RefreshTokenGuardTokenGuard } from '../../common/guards/refresh-toke.guard';
+import { RefreshTokenGuard } from '../../common/guards/refresh-toke.guard';
 import { ExtractUser } from '../../common/decorators/extract-user';
 import { ExtractTokenId } from '../../common/decorators/extract-token-id';
 import { User } from '../user/entities/user.entity';
@@ -63,7 +63,7 @@ export class AuthController {
     return { message: 'Logged in successfully', ...tokens };
   }
 
-  @UseGuards(RefreshTokenGuardTokenGuard)
+  @UseGuards(RefreshTokenGuard)
   @Post('refresh-token')
   refreshToken(@ExtractUser() user: User, @ExtractTokenId() tokenId: string) {
     const accessToken = this.authService.rotateToken(user, tokenId);

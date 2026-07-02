@@ -3,6 +3,7 @@ import { type Request } from 'express';
 
 export const ExtractUser = createParamDecorator(
   (_: unknown, ctx: ExecutionContext) => {
-    return ctx.switchToHttp().getRequest<Request>().user;
+    const { userId, userRole } = ctx.switchToHttp().getRequest<Request>();
+    return { userId, userRole };
   },
 );

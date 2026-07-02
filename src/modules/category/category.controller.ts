@@ -7,12 +7,18 @@ import {
   Patch,
   Post,
   UnprocessableEntityException,
+  UseGuards,
 } from '@nestjs/common';
 import { CreationStatusEnum } from '../../common/enums/creation-status.enum';
 import { R2BucketService } from '../bucket/bucket.service';
 import { CategoryService } from './category.service';
 import { CategoryDto } from './dto/category.dto';
+import { AccessTokenGuard } from '../../common/guards/access-toke.guard';
+import { UserRoleEnum } from '../user/enums/user-role.enum';
+import { RolesGuard } from '../../common/guards/user-roles.guard';
+import { Roles } from '../../common/decorators/roles';
 
+@UseGuards(AccessTokenGuard)
 @Controller('category')
 export class CategoryController {
   constructor(
@@ -20,6 +26,8 @@ export class CategoryController {
     private readonly r2BucketService: R2BucketService,
   ) {}
 
+  @Roles(UserRoleEnum.Admin)
+  @UseGuards(RolesGuard)
   @Post()
   async create(@Body() createCategoryDto: CategoryDto) {
     const { logoKey, ...category } =
@@ -35,6 +43,8 @@ export class CategoryController {
     return { category, uploadUrl };
   }
 
+  @Roles(UserRoleEnum.Admin)
+  @UseGuards(RolesGuard)
   @Post(':id/confirm')
   async confirmCategoryCreation(@Param('id') categoryId: string) {
     const category =
@@ -63,6 +73,8 @@ export class CategoryController {
     return this.categoryService.findOne(slug);
   }
 
+  @Roles(UserRoleEnum.Admin)
+  @UseGuards(RolesGuard)
   @Patch(':id')
   update(
     @Param('id') id: string,
@@ -71,6 +83,8 @@ export class CategoryController {
     return this.categoryService.update(id, updateCategoryDto);
   }
 
+  @Roles(UserRoleEnum.Admin)
+  @UseGuards(RolesGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.categoryService.remove(id);

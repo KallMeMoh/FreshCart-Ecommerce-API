@@ -9,6 +9,7 @@ import {
   Put,
   Query,
   ParseEnumPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -19,7 +20,9 @@ import { ExtractTokenId } from '../../common/decorators/extract-token-id';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { MailService } from '../mail/mail.service';
 import { AllowedPictureMimeType } from '../../common/enums/picture-mimetype.enum';
+import { AccessTokenGuard } from '../../common/guards/access-toke.guard';
 
+@UseGuards(AccessTokenGuard)
 @Controller('user')
 export class UserController {
   constructor(
