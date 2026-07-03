@@ -6,15 +6,14 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { compare, hash } from 'bcrypt';
 import { randomInt } from 'node:crypto';
 import { AuthProviderEnum } from '../auth/enums/auth-provider.enum';
 import { ConfigService } from '../config/config.service';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './entities/user.entity';
 import { UsersRepository } from './user.repository';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class UsersService {
@@ -33,12 +32,17 @@ export class UsersService {
     return user;
   }
 
-  async request2FAActivation(user: User) {
+  async request2FAActivation(userId: string, tokenId: string) {
+    const user = await this.usersRepository.findById(userId);
+    if (!user) {
+      this.eventEmitter.emit('user.deleted', { tokenId });
+      throw new NotFoundException("Account doesn't exist");
+    }
+
     if (user.verified) throw new ConflictException('Account already verified');
 
-    const codeExists = await this.usersRepository.twoFAActivationCodeExists(
-      user._id.toString(),
-    );
+    const codeExists =
+      await this.usersRepository.twoFAActivationCodeExists(userId);
     if (codeExists)
       throw new HttpException(
         'A code was already sent, please wait before requesting a new one',
@@ -48,10 +52,16 @@ export class UsersService {
     const code = String(randomInt(100000, 999999));
     await this.usersRepository.set2FAActivationCode(user._id.toString(), code);
 
-    return code;
+    return { email: user.email, code };
   }
 
-  async activate2FA(user: User, code: string) {
+  async activate2FA(userId: string, tokenId: string, code: string) {
+    const user = await this.usersRepository.findById(userId);
+    if (!user) {
+      this.eventEmitter.emit('user.deleted', { tokenId });
+      throw new NotFoundException("Account doesn't exist");
+    }
+
     if (user.verified) throw new ConflictException('Account already verified');
 
     const otp = await this.usersRepository.get2FAActivationCode(
@@ -70,7 +80,13 @@ export class UsersService {
     ]);
   }
 
-  async requestVerificationCode(user: User) {
+  async requestVerificationCode(userId: string, tokenId: string) {
+    const user = await this.usersRepository.findById(userId);
+    if (!user) {
+      this.eventEmitter.emit('user.deleted', { tokenId });
+      throw new NotFoundException("Account doesn't exist");
+    }
+
     if (user.verified) throw new ConflictException('Account already verified');
 
     const otpExists = await this.usersRepository.verificationCodeExists(
@@ -85,10 +101,15 @@ export class UsersService {
     const code = String(randomInt(100000, 999999));
     await this.usersRepository.setVerificationCode(user._id.toString(), code);
 
-    return code;
+    return { email: user.email, code };
   }
 
-  async verifyUserAccount(user: User, code: string) {
+  async verifyUserAccount(userId: string, tokenId: string, code: string) {
+    const user = await this.usersRepository.findById(userId);
+    if (!user) {
+      this.eventEmitter.emit('user.deleted', { tokenId });
+      throw new NotFoundException("Account doesn't exist");
+    }
     if (user.verified) throw new ConflictException('Account already verified');
 
     const otp = await this.usersRepository.getVerificationCode(
@@ -123,10 +144,16 @@ export class UsersService {
   }
 
   async updateUserPassword(
-    user: User,
+    userId: string,
     jti: string,
     { old_password, new_password }: UpdatePasswordDto,
   ) {
+    const user = await this.usersRepository.findById(userId);
+    if (!user) {
+      this.eventEmitter.emit('user.deleted', { tokenId: jti });
+      throw new NotFoundException("Account doesn't exist");
+    }
+
     if (user.provider === AuthProviderEnum.Google) return;
 
     const passwordsMatch = await compare(old_password, user.hashedPassword!);

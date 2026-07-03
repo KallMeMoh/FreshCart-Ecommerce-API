@@ -8,22 +8,21 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
+import { OnEvent } from '@nestjs/event-emitter';
+import { OAuth2Client } from 'google-auth-library';
+import { Types } from 'mongoose';
 import { ConfigService } from '../config/config.service';
 import { MailService } from '../mail/mail.service';
+import { JwtService } from '../token/jwt.service';
 import { UserRoleEnum } from '../user/enums/user-role.enum';
 import { UsersRepository } from '../user/user.repository';
 import { AuthRepository } from './auth.repository';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { LoginConfirmationDto } from './dto/login-confirmation.dto';
 import { LoginDto } from './dto/login.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { SignupDto } from './dto/signup.dto';
 import { AuthProviderEnum } from './enums/auth-provider.enum';
-import { Types } from 'mongoose';
-import { LoginConfirmationDto } from './dto/login-confirmation.dto';
-import { OAuth2Client } from 'google-auth-library';
-import { ForgotPasswordDto } from './dto/forgot-password.dto';
-import { ResetPasswordDto } from './dto/reset-password.dto';
-import { User } from '../user/entities/user.entity';
-import { OnEvent } from '@nestjs/event-emitter';
-import { JwtService } from '../token/jwt.service';
 
 @Injectable()
 export class AuthService {
@@ -37,11 +36,11 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
 
-  private generateTokens(userId: Types.ObjectId, jwtid?: string) {
+  private generateTokens(userId: string, role: UserRoleEnum, jwtid?: string) {
     const jti = jwtid ?? randomUUID();
 
     const accessToken = this.jwtService.sign(
-      { sub: userId, jti },
+      { sub: userId, role, jti },
       {
         // note to self: explicitness is superior than implicitness
         secret: this.configService.refreshSecret,
@@ -50,7 +49,7 @@ export class AuthService {
     );
 
     const refreshToken = this.jwtService.sign(
-      { sub: userId, jti },
+      { sub: userId, role, jti },
       {
         secret: this.configService.refreshSecret,
         expiresIn: '1y',
@@ -131,7 +130,7 @@ export class AuthService {
       return { requires2FA: true, token } as const;
     }
 
-    return this.generateTokens(user._id);
+    return this.generateTokens(user._id.toString(), user.role);
   }
 
   async confirmLogin({ otp, token }: LoginConfirmationDto) {
@@ -160,7 +159,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    return this.generateTokens(user._id);
+    return this.generateTokens(user._id.toString(), user.role);
   }
 
   async googleSignup(idToken: string) {
@@ -208,11 +207,15 @@ export class AuthService {
         'This account uses password sign-in. Please log in with your password.',
       );
 
-    return this.generateTokens(user._id);
+    return this.generateTokens(user._id.toString(), user.role);
   }
 
-  rotateToken(user: User, jti: string) {
-    const { accessToken: newAccessToken } = this.generateTokens(user._id, jti);
+  rotateToken(user: { userId: string; userRole: UserRoleEnum }, jti: string) {
+    const { accessToken: newAccessToken } = this.generateTokens(
+      user.userId,
+      user.userRole,
+      jti,
+    );
     return newAccessToken;
   }
 

@@ -7,18 +7,18 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { LoginConfirmationDto } from './dto/login-confirmation.dto';
-import { LoginDto } from './dto/login.dto';
-import { SignupDto } from './dto/signup.dto';
 import type { Request } from 'express';
-import { ForgotPasswordDto } from './dto/forgot-password.dto';
-import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ExtractTokenId } from '../../common/decorators/extract-token-id';
+import { ExtractUser } from '../../common/decorators/extract-user';
 import { AccessTokenGuard } from '../../common/guards/access-toke.guard';
 import { RefreshTokenGuard } from '../../common/guards/refresh-toke.guard';
-import { ExtractUser } from '../../common/decorators/extract-user';
-import { ExtractTokenId } from '../../common/decorators/extract-token-id';
-import { User } from '../user/entities/user.entity';
+import { UserRoleEnum } from '../user/enums/user-role.enum';
+import { AuthService } from './auth.service';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { LoginConfirmationDto } from './dto/login-confirmation.dto';
+import { LoginDto } from './dto/login.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import { SignupDto } from './dto/signup.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -65,7 +65,10 @@ export class AuthController {
 
   @UseGuards(RefreshTokenGuard)
   @Post('refresh-token')
-  refreshToken(@ExtractUser() user: User, @ExtractTokenId() tokenId: string) {
+  refreshToken(
+    @ExtractUser() user: { userId: string; userRole: UserRoleEnum },
+    @ExtractTokenId() tokenId: string,
+  ) {
     const accessToken = this.authService.rotateToken(user, tokenId);
     return { message: 'Token refreshed successfully', accessToken };
   }
