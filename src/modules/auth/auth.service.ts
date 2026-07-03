@@ -43,7 +43,7 @@ export class AuthService {
       { sub: userId, role, jti },
       {
         // note to self: explicitness is superior than implicitness
-        secret: this.configService.refreshSecret,
+        secret: this.configService.accessSecret,
         expiresIn: '15m',
       },
     );

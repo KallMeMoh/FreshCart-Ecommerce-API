@@ -25,7 +25,6 @@ export class JwtService extends NestJwtService {
     }
 
     const { jti, sub, role } = payload;
-    console.log(!jti, !sub, !role, !isUserRoleEnum(role));
     if (
       !jti ||
       !sub ||
@@ -33,7 +32,7 @@ export class JwtService extends NestJwtService {
       !isUserRoleEnum(role) ||
       (await this.redisClient.get(`jwt:blacklist:${jti}`))
     ) {
-      throw new UnauthorizedException('Invalid or malformed token 2');
+      throw new UnauthorizedException('Invalid or malformed token');
     }
 
     return { jti, sub, role };
