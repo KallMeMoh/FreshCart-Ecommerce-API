@@ -66,7 +66,13 @@ export class Product {
     type: Number,
     default: 0,
   })
-  ratingAvg!: number;
+  averageRating!: number;
+
+  @Prop({
+    type: Number,
+    default: 0,
+  })
+  reviewCount!: number;
 
   @Prop({
     type: String,

@@ -1,8 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
-import { User } from '../../user/entities/user.entity';
-import { CreationStatusEnum } from '../../../common/enums/creation-status.enum';
 import { Product } from '../../product/entities/product.entity';
+import { User } from '../../user/entities/user.entity';
 
 @Schema({
   timestamps: true,
@@ -36,14 +35,7 @@ export class Review {
     type: String,
     default: null,
   })
-  message!: string | null;
-
-  @Prop({
-    type: String,
-    enum: CreationStatusEnum,
-    default: CreationStatusEnum.Draft,
-  })
-  status: CreationStatusEnum = CreationStatusEnum.Draft;
+  message?: string | null;
 
   createdAt!: Date;
   updatedAt!: Date;
@@ -51,3 +43,6 @@ export class Review {
 
 export type ReviewDocument = HydratedDocument<Review>;
 export const ReviewSchema = SchemaFactory.createForClass(Review);
+
+ReviewSchema.index({ productId: 1, userId: 1 }, { unique: true });
+ReviewSchema.index({ productId: 1, createdAt: -1 });

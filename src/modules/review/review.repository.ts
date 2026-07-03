@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Review } from './entities/review.entity';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { ClientSession, Model } from 'mongoose';
 
 @Injectable()
 export class ReviewsRepository {
@@ -9,16 +9,25 @@ export class ReviewsRepository {
     @InjectModel(Review.name) private readonly reviewModel: Model<Review>,
   ) {}
 
-  create(data: Omit<Review, '_id' | 'createdAt' | 'updatedAt'>) {
-    return this.reviewModel.create(data);
+  async create(
+    data: Omit<Review, '_id' | 'createdAt' | 'updatedAt'>,
+    session?: ClientSession,
+  ) {
+    const [review] = await this.reviewModel.create([data], { session });
+    return review;
   }
 
   async findById(reviewId: string) {
     return this.reviewModel.findById(reviewId);
   }
 
-  async findAll() {
-    return this.reviewModel.find({}, '-__v').lean();
+  async findAll(product: string, page: number = 1, limit: number = 10) {
+    return this.reviewModel
+      .find({ product }, '-__v')
+      .limit(limit)
+      .skip((page - 1) * limit)
+      .populate('product')
+      .lean();
   }
 
   async updateOne(slug: string, data: Partial<Review>) {
