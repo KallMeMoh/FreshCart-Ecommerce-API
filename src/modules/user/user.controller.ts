@@ -15,19 +15,20 @@ import { randomUUID } from 'node:crypto';
 import { ExtractUser } from '../../common/decorators/extract-user';
 import { AllowedPictureMimeType } from '../../common/enums/picture-mimetype.enum';
 import { AccessTokenGuard } from '../../common/guards/access-token.guard';
+import type { RUser } from '../../types/express';
 import { R2BucketService } from '../bucket/bucket.service';
+import { ConfigService } from '../config/config.service';
 import { MailService } from '../mail/mail.service';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersService } from './user.service';
-import { ParseVerificationUrlPipe } from '../../common/pipes/parse-verification-url.pipe';
-import type { RUser } from '../../types/express';
 
 @UseGuards(AccessTokenGuard)
 @Controller('users')
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
+    private readonly configService: ConfigService,
     private readonly r2BucketService: R2BucketService,
     private readonly mailService: MailService,
   ) {}
@@ -68,11 +69,7 @@ export class UsersController {
   }
 
   @Post('verification/resend')
-  async reRequestVerification(
-    @ExtractUser() user: RUser,
-    @Body('verificationRedirectUrl', ParseVerificationUrlPipe)
-    verificationRedirectUrl: string,
-  ) {
+  async reRequestVerification(@ExtractUser() user: RUser) {
     const { email, token } = await this.usersService.requestVerificationCode(
       user.id,
       user.tokenId,
@@ -80,7 +77,7 @@ export class UsersController {
 
     await this.mailService.sendVerificationEmail(
       email,
-      `${verificationRedirectUrl}/${token}`,
+      `${this.configService.frontendUrl}/${token}`,
     );
 
     return { message: 'A verification link has been sent to your inbox' };

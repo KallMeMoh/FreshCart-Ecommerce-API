@@ -3,7 +3,6 @@ import {
   IsEmail,
   IsString,
   IsStrongPassword,
-  IsUrl,
   Matches,
   MaxLength,
   MinLength,
@@ -33,7 +32,4 @@ export class SignupDto {
   @IsStrongPassword()
   @MatchesField('password', { message: 'Passwords do not match' })
   confirm_password!: string;
-
-  @IsUrl()
-  verificationRedirectUrl!: string;
 }

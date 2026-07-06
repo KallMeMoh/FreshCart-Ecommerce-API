@@ -64,12 +64,7 @@ export class AuthService {
     };
   }
 
-  async signup({
-    username,
-    email,
-    password,
-    verificationRedirectUrl,
-  }: SignupDto) {
+  async signup({ username, email, password }: SignupDto) {
     const userExists = await this.usersRepository.existsByEmail(email);
     if (userExists) throw new ConflictException('Email already in use');
 
@@ -92,7 +87,10 @@ export class AuthService {
     await this.usersRepository.setVerificationToken(user._id.toString(), token);
 
     this.mailService
-      .sendVerificationEmail(user.email, `${verificationRedirectUrl}/${token}`)
+      .sendVerificationEmail(
+        user.email,
+        `${this.configService.frontendUrl}/${token}`,
+      )
       .catch((err: unknown) => console.error('Failed to email OTP: ', err));
   }
 
