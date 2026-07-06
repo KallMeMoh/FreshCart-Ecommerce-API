@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { Roles } from '../../common/decorators/roles';
 import { CreationStatusEnum } from '../../common/enums/creation-status.enum';
-import { AccessTokenGuard } from '../../common/guards/access-toke.guard';
+import { AccessTokenGuard } from '../../common/guards/access-token.guard';
 import { RolesGuard } from '../../common/guards/user-roles.guard';
 import { R2BucketService } from '../bucket/bucket.service';
 import { UserRoleEnum } from '../user/enums/user-role.enum';

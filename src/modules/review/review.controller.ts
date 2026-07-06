@@ -11,7 +11,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ExtractUser } from '../../common/decorators/extract-user';
-import { AccessTokenGuard } from '../../common/guards/access-toke.guard';
+import { AccessTokenGuard } from '../../common/guards/access-token.guard';
 import { ParseMongoIdPipe } from '../../common/pipes/parse-mongo-id.pipe';
 import { UserRoleEnum } from '../user/enums/user-role.enum';
 import { CreateReviewDto } from './dto/create-review.dto';

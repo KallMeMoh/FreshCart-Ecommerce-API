@@ -1,6 +1,6 @@
 import { IsString, Matches, MaxLength, MinLength } from 'class-validator';
 
-export class LoginConfirmationDto {
+export class LoginCompletionDto {
   @IsString()
   @MinLength(6)
   @MaxLength(6)

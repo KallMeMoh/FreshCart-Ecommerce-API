@@ -18,7 +18,7 @@ import { UserRoleEnum } from '../user/enums/user-role.enum';
 import { UsersRepository } from '../user/user.repository';
 import { AuthRepository } from './auth.repository';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
-import { LoginConfirmationDto } from './dto/login-confirmation.dto';
+import { LoginCompletionDto } from './dto/login-confirmation.dto';
 import { LoginDto } from './dto/login.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { SignupDto } from './dto/signup.dto';
@@ -56,7 +56,12 @@ export class AuthService {
       },
     );
 
-    return { accessToken, refreshToken, requires2FA: false } as const;
+    return {
+      requires2FA: false,
+      pendingToken: null,
+      accessToken,
+      refreshToken,
+    };
   }
 
   async signup({
@@ -84,7 +89,7 @@ export class AuthService {
     });
 
     const token = randomBytes(32).toString('hex');
-    await this.usersRepository.setVerificationCode(user._id.toString(), token);
+    await this.usersRepository.setVerificationToken(user._id.toString(), token);
 
     this.mailService
       .sendVerificationEmail(user.email, `${verificationRedirectUrl}/${token}`)
@@ -115,7 +120,7 @@ export class AuthService {
     }
 
     if (user.has2FA) {
-      const token = this.jwtService.sign(
+      const pendingToken = this.jwtService.sign(
         { sub: user._id },
         {
           secret: this.configService.pendingAuthSecret,
@@ -127,13 +132,18 @@ export class AuthService {
       await this.authRepository.store2FACode(user._id.toString(), code);
       await this.mailService.send2FAEmail(user.email, code);
 
-      return { requires2FA: true, token } as const;
+      return {
+        requires2FA: true,
+        pendingToken,
+        accessToken: null,
+        refreshToken: null,
+      };
     }
 
     return this.generateTokens(user._id.toString(), user.role);
   }
 
-  async confirmLogin({ otp, token }: LoginConfirmationDto) {
+  async completeLogin({ otp, token }: LoginCompletionDto) {
     const payload = this.jwtService.verify<{ sub: string }>(token, {
       secret: this.configService.pendingAuthSecret,
     });

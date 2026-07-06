@@ -70,11 +70,11 @@ export class UsersRepository {
     );
   }
 
-  async getVerificationCode(userId: string) {
+  async getVerificationToken(userId: string) {
     return this.redisClient.get(this.verificationCode(userId.toString()));
   }
 
-  async setVerificationCode(userId: string, code: string) {
+  async setVerificationToken(userId: string, code: string) {
     return this.redisClient.set(
       this.verificationCode(userId.toString()),
       code,

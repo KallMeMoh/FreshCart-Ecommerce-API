@@ -14,7 +14,7 @@ import { CreationStatusEnum } from '../../common/enums/creation-status.enum';
 import { R2BucketService } from '../bucket/bucket.service';
 import { CategoriesService } from './category.service';
 import { CreateCategoryDto, UpdateCategoryDto } from './dto/category.dto';
-import { AccessTokenGuard } from '../../common/guards/access-toke.guard';
+import { AccessTokenGuard } from '../../common/guards/access-token.guard';
 import { UserRoleEnum } from '../user/enums/user-role.enum';
 import { RolesGuard } from '../../common/guards/user-roles.guard';
 import { Roles } from '../../common/decorators/roles';

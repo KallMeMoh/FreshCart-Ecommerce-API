@@ -10,21 +10,29 @@ import { JwtService } from '../../modules/token/jwt.service';
 import { extractBearerToken } from '../utils/extract-bearer-token';
 
 @Injectable()
-export class RefreshTokenGuard implements CanActivate {
+export class PendingTokenGuard implements CanActivate {
   constructor(
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
   ) {}
+
+  private extractPendingToken(req: Request): string {
+    const cookieToken = req.cookies?.pendingToken as unknown;
+    if (typeof cookieToken === 'string' && cookieToken) return cookieToken;
+
+    return extractBearerToken(req);
+  }
+
   async canActivate(context: ExecutionContext) {
     if (context.getType() !== 'http')
       throw new UnauthorizedException('Unsupported transport');
 
     const req = context.switchToHttp().getRequest<Request>();
-    const token = extractBearerToken(req);
+    const token = this.extractPendingToken(req);
 
     const { sub, jti, role } = await this.jwtService.validate(
       token,
-      this.configService.refreshSecret,
+      this.configService.pendingAuthSecret,
     );
 
     req.userId = sub;

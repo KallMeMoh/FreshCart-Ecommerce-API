@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { compare, hash } from 'bcrypt';
-import { randomInt } from 'node:crypto';
+import { randomBytes, randomInt } from 'node:crypto';
 import { AuthProviderEnum } from '../auth/enums/auth-provider.enum';
 import { ConfigService } from '../config/config.service';
 import { UpdatePasswordDto } from './dto/update-password.dto';
@@ -94,17 +94,17 @@ export class UsersService {
     );
     if (otpExists)
       throw new HttpException(
-        'A code was already sent, please wait before requesting a new one',
+        'A link was already sent, please wait before requesting a new one',
         HttpStatus.TOO_MANY_REQUESTS,
       );
 
-    const code = String(randomInt(100000, 999999));
-    await this.usersRepository.setVerificationCode(user._id.toString(), code);
+    const token = randomBytes(32).toString('hex');
+    await this.usersRepository.setVerificationToken(user._id.toString(), token);
 
-    return { email: user.email, code };
+    return { email: user.email, token };
   }
 
-  async verifyUserAccount(userId: string, tokenId: string, code: string) {
+  async verifyUserAccount(userId: string, tokenId: string, token: string) {
     const user = await this.usersRepository.findById(userId);
     if (!user) {
       this.eventEmitter.emit('user.deleted', { tokenId });
@@ -112,14 +112,12 @@ export class UsersService {
     }
     if (user.verified) throw new ConflictException('Account already verified');
 
-    const otp = await this.usersRepository.getVerificationCode(
+    const storedToken = await this.usersRepository.getVerificationToken(
       user._id.toString(),
     );
 
-    if (!otp)
-      throw new NotFoundException('Code expired, please request a new one');
-    if (otp !== code)
-      throw new UnauthorizedException('Invalid code, please try again');
+    if (storedToken !== token)
+      throw new NotFoundException('Link expired, please request a new one');
 
     await Promise.all([
       this.usersRepository.delVerificationCode(user._id.toString()),

@@ -15,12 +15,13 @@ import { randomUUID } from 'node:crypto';
 import { ExtractTokenId } from '../../common/decorators/extract-token-id';
 import { ExtractUser } from '../../common/decorators/extract-user';
 import { AllowedPictureMimeType } from '../../common/enums/picture-mimetype.enum';
-import { AccessTokenGuard } from '../../common/guards/access-toke.guard';
+import { AccessTokenGuard } from '../../common/guards/access-token.guard';
 import { R2BucketService } from '../bucket/bucket.service';
 import { MailService } from '../mail/mail.service';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersService } from './user.service';
+import { ParseVerificationUrlPipe } from '../../common/pipes/parse-verification-url.pipe';
 
 @UseGuards(AccessTokenGuard)
 @Controller('users')
@@ -77,13 +78,20 @@ export class UsersController {
   async reRequestVerification(
     @ExtractUser() user: { userId: string },
     @ExtractTokenId() tokenId: string,
+    @Body('verificationRedirectUrl', ParseVerificationUrlPipe)
+    verificationRedirectUrl: string,
   ) {
-    const { email, code } = await this.usersService.requestVerificationCode(
+    const { email, token } = await this.usersService.requestVerificationCode(
       user.userId,
       tokenId,
     );
-    await this.mailService.send2FAEmail(email, code);
-    return { message: 'OTP code emailed successfully' };
+
+    await this.mailService.sendVerificationEmail(
+      email,
+      `${verificationRedirectUrl}/${token}`,
+    );
+
+    return { message: 'A verification link has been sent to your inbox' };
   }
 
   @Post('verify')
@@ -91,9 +99,9 @@ export class UsersController {
     @ExtractUser() user: { userId: string },
 
     @ExtractTokenId() tokenId: string,
-    @Body() otp: string,
+    @Body('token') token: string,
   ) {
-    await this.usersService.verifyUserAccount(user.userId, tokenId, otp);
+    await this.usersService.verifyUserAccount(user.userId, tokenId, token);
     return { message: 'Account has been verified successfully' };
   }
 
