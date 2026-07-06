@@ -26,7 +26,7 @@ export class UsersService {
   async findOne(userId: string) {
     const user = await this.usersRepository.findById(
       userId,
-      '-password -provider -updatedAt -__v',
+      '-hashedPassword -provider -updatedAt -__v',
     );
     if (user === null) throw new NotFoundException("User doesn't exist");
     return user;
