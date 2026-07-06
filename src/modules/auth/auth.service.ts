@@ -217,7 +217,7 @@ export class AuthService {
     return newAccessToken;
   }
 
-  async resetPassword({ email, verificationRedirectUrl }: ForgotPasswordDto) {
+  async resetPassword({ email }: ForgotPasswordDto) {
     const user = await this.usersRepository.findByEmail(email);
 
     if (!user) return;
@@ -226,7 +226,7 @@ export class AuthService {
     await this.authRepository.setPasswordResetToken(token, user._id.toString());
     await this.mailService.sendPasswordResetEmail(
       user.email,
-      `${verificationRedirectUrl}/${token}`,
+      `${this.configService.frontendUrl}/forget-password/${token}`,
     );
   }
 
