@@ -71,6 +71,7 @@ export class UsersRepository {
   }
 
   async getVerificationToken(userId: string) {
+    console.log(userId.toString());
     return this.redisClient.get(this.verificationCode(userId.toString()));
   }
 

@@ -22,6 +22,7 @@ import { MailService } from '../mail/mail.service';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersService } from './user.service';
+import { RequiredFieldPipe } from '../../common/pipes/required-field.pipe';
 
 @UseGuards(AccessTokenGuard)
 @Controller('users')
@@ -63,7 +64,10 @@ export class UsersController {
   }
 
   @Post('2fa/verify')
-  async verify2FA(@ExtractUser() user: RUser, @Body() otp: string) {
+  async verify2FA(
+    @ExtractUser() user: RUser,
+    @Body('otp', RequiredFieldPipe) otp: string,
+  ) {
     await this.usersService.activate2FA(user.id, user.tokenId, otp);
     return { message: 'Account has been verified successfully' };
   }
@@ -83,11 +87,13 @@ export class UsersController {
     return { message: 'A verification link has been sent to your inbox' };
   }
 
-  @Post('verify')
+  @Post('verify/:token')
   async completeVerification(
     @ExtractUser() user: RUser,
-    @Body('token') token: string,
+    @Param('token') token: string,
   ) {
+    console.log(token, user);
+
     await this.usersService.verifyUserAccount(user.id, user.tokenId, token);
     return { message: 'Account has been verified successfully' };
   }

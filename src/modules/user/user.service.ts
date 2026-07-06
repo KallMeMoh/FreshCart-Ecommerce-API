@@ -112,6 +112,7 @@ export class UsersService {
     }
     if (user.verified) throw new ConflictException('Account already verified');
 
+    console.log(user._id.toString());
     const storedToken = await this.usersRepository.getVerificationToken(
       user._id.toString(),
     );
