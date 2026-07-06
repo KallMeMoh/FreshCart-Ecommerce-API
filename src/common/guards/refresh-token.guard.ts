@@ -35,9 +35,11 @@ export class RefreshTokenGuard implements CanActivate {
       this.configService.refreshSecret,
     );
 
-    req.userId = sub;
-    req.userRole = role;
-    req.tokenId = jti;
+    req.user = {
+      id: sub,
+      role,
+      tokenId: jti,
+    };
 
     return true;
   }

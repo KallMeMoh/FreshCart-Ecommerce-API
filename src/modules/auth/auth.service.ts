@@ -18,11 +18,11 @@ import { UserRoleEnum } from '../user/enums/user-role.enum';
 import { UsersRepository } from '../user/user.repository';
 import { AuthRepository } from './auth.repository';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
-import { LoginCompletionDto } from './dto/login-confirmation.dto';
 import { LoginDto } from './dto/login.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { SignupDto } from './dto/signup.dto';
 import { AuthProviderEnum } from './enums/auth-provider.enum';
+import type { RUser } from '../../types/express';
 
 @Injectable()
 export class AuthService {
@@ -143,33 +143,23 @@ export class AuthService {
     return this.generateTokens(user._id.toString(), user.role);
   }
 
-  async completeLogin({ otp, token }: LoginCompletionDto) {
-    const payload = this.jwtService.verify<{ sub: string }>(token, {
-      secret: this.configService.pendingAuthSecret,
-    });
+  async completeLogin(user: RUser, otp: string) {
+    const code = await this.authRepository.get2FACode(user.id);
 
-    const [user, code] = await Promise.all([
-      this.usersRepository.findById(payload.sub),
-      this.authRepository.get2FACode(payload.sub),
-    ]);
-
-    if (!user) throw new NotFoundException('Account does not exist');
     if (!code) throw new NotFoundException('OTP Expired, please login again');
 
-    const loginAttempts = await this.authRepository.getLoginAttempts(
-      user._id.toString(),
-    );
+    const loginAttempts = await this.authRepository.getLoginAttempts(user.id);
     if (loginAttempts && parseInt(loginAttempts) > 5)
       throw new UnauthorizedException(
         'Account temporarily banned, try again later',
       );
 
     if (otp !== code) {
-      await this.authRepository.incrementLoginAttempts(user._id.toString());
+      await this.authRepository.incrementLoginAttempts(user.id);
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    return this.generateTokens(user._id.toString(), user.role);
+    return this.generateTokens(user.id, user.role);
   }
 
   async googleSignup(idToken: string) {
@@ -220,11 +210,11 @@ export class AuthService {
     return this.generateTokens(user._id.toString(), user.role);
   }
 
-  rotateToken(user: { userId: string; userRole: UserRoleEnum }, jti: string) {
+  rotateToken(user: RUser) {
     const { accessToken: newAccessToken } = this.generateTokens(
-      user.userId,
-      user.userRole,
-      jti,
+      user.id,
+      user.role,
+      user.tokenId,
     );
     return newAccessToken;
   }

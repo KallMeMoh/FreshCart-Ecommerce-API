@@ -4,26 +4,24 @@ import {
   HttpCode,
   Param,
   Post,
-  Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
-import type { Request, Response } from 'express';
+import type { Response } from 'express';
 import { ClientType } from '../../common/decorators/client-type.decorator';
-import { ExtractTokenId } from '../../common/decorators/extract-token-id';
 import { ExtractUser } from '../../common/decorators/extract-user';
 import { ClientTypeEnum } from '../../common/enums/client-type.enum';
 import { AccessTokenGuard } from '../../common/guards/access-token.guard';
+import { PendingTokenGuard } from '../../common/guards/pending-token.guard';
 import { RefreshTokenGuard } from '../../common/guards/refresh-token.guard';
 import { ParseClientTypePipe } from '../../common/pipes/parse-client-type.pipe';
-import { UserRoleEnum } from '../user/enums/user-role.enum';
+import { ParseOtpPipe } from '../../common/pipes/parse-otp.pipe';
+import type { RUser } from '../../types/express';
 import { AuthService } from './auth.service';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
-import { LoginCompletionDto } from './dto/login-confirmation.dto';
 import { LoginDto } from './dto/login.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { SignupDto } from './dto/signup.dto';
-import { PendingTokenGuard } from '../../common/guards/pending-token.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -80,10 +78,13 @@ export class AuthController {
 
   @Post('login/complete')
   @UseGuards(PendingTokenGuard)
-  async completeLogin(@Body() body: LoginCompletionDto) {
+  async completeLogin(
+    @Body('otp', ParseOtpPipe) otp: string,
+    @ExtractUser() user: RUser,
+  ) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { requires2FA, ...credentials } =
-      await this.authService.completeLogin(body);
+      await this.authService.completeLogin(user, otp);
     return { message: 'Logged in successfully', credentials };
   }
 
@@ -102,11 +103,8 @@ export class AuthController {
 
   @Post('refresh-token')
   @UseGuards(RefreshTokenGuard)
-  refreshToken(
-    @ExtractUser() user: { userId: string; userRole: UserRoleEnum },
-    @ExtractTokenId() tokenId: string,
-  ) {
-    const accessToken = this.authService.rotateToken(user, tokenId);
+  refreshToken(@ExtractUser() user: RUser) {
+    const accessToken = this.authService.rotateToken(user);
     return { message: 'Token refreshed successfully', accessToken };
   }
 
@@ -129,8 +127,8 @@ export class AuthController {
 
   @UseGuards(AccessTokenGuard)
   @Post('logout')
-  async logout(@Req() req: Request) {
-    await this.authService.blacklistToken(req.tokenId!);
+  async logout(@ExtractUser() user: RUser) {
+    await this.authService.blacklistToken(user.tokenId);
     return { message: 'Token revoked successfully' };
   }
 }

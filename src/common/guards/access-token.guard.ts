@@ -27,9 +27,11 @@ export class AccessTokenGuard implements CanActivate {
       this.configService.accessSecret,
     );
 
-    req.userId = sub;
-    req.userRole = role;
-    req.tokenId = jti;
+    req.user = {
+      id: sub,
+      role,
+      tokenId: jti,
+    };
 
     return true;
   }

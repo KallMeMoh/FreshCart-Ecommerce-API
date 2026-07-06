@@ -12,7 +12,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
-import { ExtractTokenId } from '../../common/decorators/extract-token-id';
 import { ExtractUser } from '../../common/decorators/extract-user';
 import { AllowedPictureMimeType } from '../../common/enums/picture-mimetype.enum';
 import { AccessTokenGuard } from '../../common/guards/access-token.guard';
@@ -22,6 +21,7 @@ import { UpdatePasswordDto } from './dto/update-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersService } from './user.service';
 import { ParseVerificationUrlPipe } from '../../common/pipes/parse-verification-url.pipe';
+import type { RUser } from '../../types/express';
 
 @UseGuards(AccessTokenGuard)
 @Controller('users')
@@ -52,38 +52,30 @@ export class UsersController {
   }
 
   @Post('2fa/enable')
-  async enable2FA(
-    @ExtractUser() user: { userId: string },
-    @ExtractTokenId() tokenId: string,
-  ) {
+  async enable2FA(@ExtractUser() user: RUser) {
     const { email, code } = await this.usersService.request2FAActivation(
-      user.userId,
-      tokenId,
+      user.id,
+      user.tokenId,
     );
     await this.mailService.send2FAEmail(email, code);
     return { message: 'Please check your inbox' };
   }
 
   @Post('2fa/verify')
-  async verify2FA(
-    @ExtractUser() user: { userId: string },
-    @ExtractTokenId() tokenId: string,
-    @Body() otp: string,
-  ) {
-    await this.usersService.activate2FA(user.userId, tokenId, otp);
+  async verify2FA(@ExtractUser() user: RUser, @Body() otp: string) {
+    await this.usersService.activate2FA(user.id, user.tokenId, otp);
     return { message: 'Account has been verified successfully' };
   }
 
   @Post('verification/resend')
   async reRequestVerification(
-    @ExtractUser() user: { userId: string },
-    @ExtractTokenId() tokenId: string,
+    @ExtractUser() user: RUser,
     @Body('verificationRedirectUrl', ParseVerificationUrlPipe)
     verificationRedirectUrl: string,
   ) {
     const { email, token } = await this.usersService.requestVerificationCode(
-      user.userId,
-      tokenId,
+      user.id,
+      user.tokenId,
     );
 
     await this.mailService.sendVerificationEmail(
@@ -96,24 +88,21 @@ export class UsersController {
 
   @Post('verify')
   async completeVerification(
-    @ExtractUser() user: { userId: string },
-
-    @ExtractTokenId() tokenId: string,
+    @ExtractUser() user: RUser,
     @Body('token') token: string,
   ) {
-    await this.usersService.verifyUserAccount(user.userId, tokenId, token);
+    await this.usersService.verifyUserAccount(user.id, user.tokenId, token);
     return { message: 'Account has been verified successfully' };
   }
 
   @Post('update-password')
   async updatePassword(
-    @ExtractUser() user: { userId: string },
-    @ExtractTokenId() tokenId: string,
+    @ExtractUser() user: RUser,
     @Body() updatePasswordDto: UpdatePasswordDto,
   ) {
     await this.usersService.updateUserPassword(
-      user.userId,
-      tokenId,
+      user.id,
+      user.tokenId,
       updatePasswordDto,
     );
     return { message: 'Password updated successfully' };
@@ -129,10 +118,7 @@ export class UsersController {
 
   @HttpCode(204)
   @Delete(':id')
-  deleteAccount(
-    @ExtractUser() user: { userId: string },
-    @ExtractTokenId() tokenId: string,
-  ) {
-    return this.usersService.delete(user.userId, tokenId);
+  deleteAccount(@ExtractUser() user: RUser) {
+    return this.usersService.delete(user.id, user.tokenId);
   }
 }
