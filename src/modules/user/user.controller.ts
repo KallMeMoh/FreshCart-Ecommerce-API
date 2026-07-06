@@ -92,8 +92,6 @@ export class UsersController {
     @ExtractUser() user: RUser,
     @Param('token') token: string,
   ) {
-    console.log(token, user);
-
     await this.usersService.verifyUserAccount(user.id, user.tokenId, token);
     return { message: 'Account has been verified successfully' };
   }
