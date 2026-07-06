@@ -89,7 +89,7 @@ export class AuthService {
     this.mailService
       .sendVerificationEmail(
         user.email,
-        `${this.configService.frontendUrl}/${token}`,
+        `${this.configService.frontendUrl}/verify/${token}`,
       )
       .catch((err: unknown) => console.error('Failed to email OTP: ', err));
   }

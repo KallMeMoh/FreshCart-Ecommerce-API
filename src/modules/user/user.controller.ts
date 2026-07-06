@@ -77,7 +77,7 @@ export class UsersController {
 
     await this.mailService.sendVerificationEmail(
       email,
-      `${this.configService.frontendUrl}/${token}`,
+      `${this.configService.frontendUrl}/verify/${token}`,
     );
 
     return { message: 'A verification link has been sent to your inbox' };
