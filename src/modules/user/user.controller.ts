@@ -34,15 +34,6 @@ export class UsersController {
     private readonly mailService: MailService,
   ) {}
 
-  @Get(':id')
-  async getProfile(@Param('id') id: string) {
-    const { avatarKey, ...user } = await this.usersService.findOne(id);
-    const avatar = avatarKey
-      ? this.r2BucketService.generateReadUrl(avatarKey)
-      : null;
-    return { ...user, avatar };
-  }
-
   @Get('avatar-upload-url')
   getAvatarUploadUrl(
     @Query('mimetype', new ParseEnumPipe(AllowedPictureMimeType))
@@ -51,6 +42,15 @@ export class UsersController {
     const extension = mimetype.split('/')[1];
     const key = `avatars/${Date.now()}_${randomUUID()}.${extension}`;
     return this.r2BucketService.generateUploadUrl(key, mimetype);
+  }
+
+  @Get(':id')
+  async getProfile(@Param('id') id: string) {
+    const { avatarKey, ...user } = await this.usersService.findOne(id);
+    const avatar = avatarKey
+      ? this.r2BucketService.generateReadUrl(avatarKey)
+      : null;
+    return { ...user, avatar };
   }
 
   @Post('2fa/enable')
