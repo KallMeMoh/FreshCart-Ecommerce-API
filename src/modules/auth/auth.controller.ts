@@ -22,6 +22,7 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { SignupDto } from './dto/signup.dto';
+import { RequiredFieldPipe } from '../../common/pipes/required-field.pipe';
 
 @Controller('auth')
 export class AuthController {
@@ -81,22 +82,49 @@ export class AuthController {
   async completeLogin(
     @Body('otp', ParseOtpPipe) otp: string,
     @ExtractUser() user: RUser,
+    @Res({ passthrough: true }) res: Response,
+    @ClientType('x-client-type', ParseClientTypePipe)
+    clientType: ClientTypeEnum,
   ) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { requires2FA, ...credentials } =
+    const { requires2FA, accessToken, refreshToken, pendingToken } =
       await this.authService.completeLogin(user, otp);
-    return { message: 'Logged in successfully', credentials };
+
+    if (clientType === ClientTypeEnum.Web) {
+      res.cookie(
+        requires2FA ? 'pendingToken' : 'refreshToken',
+        requires2FA ? pendingToken : refreshToken,
+        {
+          httpOnly: true,
+          secure: true,
+          sameSite: 'lax',
+          maxAge: requires2FA ? 1000 * 60 * 5 : 1000 * 60 * 60 * 24 * 7,
+          path: '/',
+        },
+      );
+    }
+
+    return {
+      message: 'Logged in successfully',
+      credentials: {
+        accessToken,
+        ...(clientType !== ClientTypeEnum.Web
+          ? {
+              refreshToken,
+            }
+          : {}),
+      },
+    };
   }
 
   @HttpCode(201)
   @Post('oauth/signup/google')
-  async googleOAuthSignup(@Body('idToken') idToken: string) {
+  async googleOAuthSignup(@Body('idToken', RequiredFieldPipe) idToken: string) {
     await this.authService.googleSignup(idToken);
     return { message: 'Account created successfully' };
   }
 
   @Post('oauth/login/google')
-  async googleOAuthLogin(@Body('idToken') idToken: string) {
+  async googleOAuthLogin(@Body('idToken', RequiredFieldPipe) idToken: string) {
     const tokens = await this.authService.googleLogin(idToken);
     return { message: 'Logged in successfully', ...tokens };
   }
@@ -123,6 +151,7 @@ export class AuthController {
     @Body() body: ResetPasswordDto,
   ) {
     await this.authService.verifyResetPassword(token, body);
+    return { message: 'Password reset successfully' };
   }
 
   @UseGuards(AccessTokenGuard)

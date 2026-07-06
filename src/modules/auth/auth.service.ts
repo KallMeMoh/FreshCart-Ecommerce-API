@@ -11,6 +11,7 @@ import {
 import { OnEvent } from '@nestjs/event-emitter';
 import { OAuth2Client } from 'google-auth-library';
 import { Types } from 'mongoose';
+import type { RUser } from '../../types/express';
 import { ConfigService } from '../config/config.service';
 import { MailService } from '../mail/mail.service';
 import { JwtService } from '../token/jwt.service';
@@ -22,7 +23,6 @@ import { LoginDto } from './dto/login.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { SignupDto } from './dto/signup.dto';
 import { AuthProviderEnum } from './enums/auth-provider.enum';
-import type { RUser } from '../../types/express';
 
 @Injectable()
 export class AuthService {
@@ -119,7 +119,7 @@ export class AuthService {
 
     if (user.has2FA) {
       const pendingToken = this.jwtService.sign(
-        { sub: user._id },
+        { sub: user._id, role: user.role, jti: randomUUID() },
         {
           secret: this.configService.pendingAuthSecret,
           expiresIn: '10m',
@@ -226,7 +226,7 @@ export class AuthService {
     await this.authRepository.setPasswordResetToken(token, user._id.toString());
     await this.mailService.sendPasswordResetEmail(
       user.email,
-      `${this.configService.frontendUrl}/forget-password/${token}`,
+      `${this.configService.frontendUrl}/reset-password/${token}`,
     );
   }
 
