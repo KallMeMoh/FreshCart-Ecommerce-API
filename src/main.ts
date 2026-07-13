@@ -25,6 +25,27 @@ async function bootstrap() {
     .setTitle('E-Commerce')
     .setDescription('Idk what description to use')
     .setVersion('1.0')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+      },
+      'access-token-header',
+    )
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+      },
+      'refresh-token-header',
+    )
+    .addCookieAuth('refreshToken', {
+      type: 'apiKey',
+      in: 'cookie',
+      name: 'refreshToken',
+    })
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, docConfig);
   SwaggerModule.setup('docs', app, documentFactory, {
