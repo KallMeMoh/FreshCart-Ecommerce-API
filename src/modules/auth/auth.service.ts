@@ -7,7 +7,6 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
-  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
@@ -218,6 +217,7 @@ export class AuthService {
         'This account uses password sign-in. Please log in with your password.',
       );
 
+    // TODO: missing 2FA protection
     return this.generateTokens(user._id.toString(), user.role);
   }
 
@@ -233,7 +233,8 @@ export class AuthService {
   async resetPassword({ email }: ForgotPasswordDto) {
     const user = await this.usersRepository.findByEmail(email);
 
-    if (!user) return;
+    if (!user || !user.verified || user.provider === AuthProviderEnum.Google)
+      return;
 
     const token = randomBytes(32).toString('hex');
     await this.authRepository.setPasswordResetToken(token, user._id.toString());
@@ -248,7 +249,7 @@ export class AuthService {
       (await this.authRepository.getPasswordResetToken(token)) ?? '';
 
     if (!Types.ObjectId.isValid(userId))
-      throw new NotFoundException('Invalid or expired reset token');
+      throw new UnauthorizedException('Invalid or expired reset token');
 
     const hashedPassword = await hash(
       new_password,
