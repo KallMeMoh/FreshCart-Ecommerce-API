@@ -9,6 +9,10 @@ export class ProductsRepository {
     @InjectModel(Product.name) private readonly productModel: Model<Product>,
   ) {}
 
+  create(data: Omit<Product, '_id' | 'createdAt' | 'updatedAt'>) {
+    return this.productModel.create(data);
+  }
+
   async updateReview(_id: string, rating: number, session?: ClientSession) {
     return this.productModel.updateOne(
       { _id },

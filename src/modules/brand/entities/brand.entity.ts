@@ -47,6 +47,24 @@ export const BrandSchema = SchemaFactory.createForClass(Brand);
 
 BrandSchema.pre('validate', function () {
   if (this.isModified('name')) {
-    this.slug = slugify(this.name, { separator: '_' });
+    this.slug = slugify(this.name, {
+      lowercase: true,
+      trim: true,
+      separator: '_',
+    });
+  }
+});
+
+BrandSchema.pre(['findOneAndUpdate', 'updateOne'], function () {
+  const update = this.getUpdate();
+
+  if (update && 'name' in update) {
+    this.set({
+      slug: slugify(update.$set!.name as string, {
+        lowercase: true,
+        trim: true,
+        separator: '_',
+      }),
+    });
   }
 });

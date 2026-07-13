@@ -4,7 +4,6 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
-import { slugify } from 'transliteration';
 import { CreationStatusEnum } from '../../common/enums/creation-status.enum';
 import { BrandsRepository } from './brand.repository';
 import { CreateBrandDto, UpdateBrandDto } from './dto/brand.dto';
@@ -22,7 +21,6 @@ export class BrandsService {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { __v, ...brand } = await this.brandsRepository.create({
       name,
-      slug: slugify(name, { separator: '-' }),
       logoKey: key,
       status: logo_mimetype
         ? CreationStatusEnum.Draft

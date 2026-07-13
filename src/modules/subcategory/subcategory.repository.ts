@@ -10,7 +10,7 @@ export class SubcategoriesRepository {
     private readonly subcategoryModel: Model<Subcategory>,
   ) {}
 
-  create(data: Omit<Subcategory, '_id' | 'createdAt' | 'updatedAt'>) {
+  create(data: Omit<Subcategory, '_id' | 'slug' | 'createdAt' | 'updatedAt'>) {
     return this.subcategoryModel.create(data);
   }
 

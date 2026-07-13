@@ -5,7 +5,6 @@ import {
 } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { Types } from 'mongoose';
-import { slugify } from 'transliteration';
 import { CreationStatusEnum } from '../../common/enums/creation-status.enum';
 import {
   CreateSubcategoryDto,
@@ -28,7 +27,6 @@ export class SubcategoriesService {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { __v, ...subcategory } = await this.subcategoriesRepository.create({
       name,
-      slug: slugify(name, { separator: '-' }),
       logoKey: key,
       category: new Types.ObjectId(categoryId),
       status: logo_mimetype

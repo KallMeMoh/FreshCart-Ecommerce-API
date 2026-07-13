@@ -4,7 +4,6 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
-import { slugify } from 'transliteration';
 import { CreationStatusEnum } from '../../common/enums/creation-status.enum';
 import { CategoriesRepository } from './category.repository';
 import { CreateCategoryDto, UpdateCategoryDto } from './dto/category.dto';
@@ -22,7 +21,6 @@ export class CategoriesService {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { __v, ...category } = await this.categoriesRepository.create({
       name,
-      slug: slugify(name, { separator: '-' }),
       logoKey: key,
       status: logo_mimetype
         ? CreationStatusEnum.Draft

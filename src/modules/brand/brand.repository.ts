@@ -9,7 +9,7 @@ export class BrandsRepository {
     @InjectModel(Brand.name) private readonly brandModel: Model<Brand>,
   ) {}
 
-  create(data: Omit<Brand, '_id' | 'createdAt' | 'updatedAt'>) {
+  create(data: Omit<Brand, '_id' | 'slug' | 'createdAt' | 'updatedAt'>) {
     return this.brandModel.create(data);
   }
 

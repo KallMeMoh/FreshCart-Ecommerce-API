@@ -5,6 +5,7 @@ import { Brand } from '../../brand/entities/brand.entity';
 import { Category } from '../../category/entities/category.entity';
 import { Subcategory } from '../../subcategory/entities/subcategory.entity';
 import { DiscounTypeEnum } from '../enums/discount-type.enum';
+import { slugify } from 'transliteration';
 
 @Schema({
   timestamps: true,
@@ -120,3 +121,27 @@ export class Product {
 
 export type ProductDocument = HydratedDocument<Product>;
 export const ProductSchema = SchemaFactory.createForClass(Product);
+
+ProductSchema.pre('validate', function () {
+  if (this.isModified('name')) {
+    this.slug = slugify(this.name, {
+      lowercase: true,
+      trim: true,
+      separator: '_',
+    });
+  }
+});
+
+ProductSchema.pre(['findOneAndUpdate', 'updateOne'], function () {
+  const update = this.getUpdate();
+
+  if (update && 'name' in update) {
+    this.set({
+      slug: slugify(update.$set!.name as string, {
+        lowercase: true,
+        trim: true,
+        separator: '_',
+      }),
+    });
+  }
+});
