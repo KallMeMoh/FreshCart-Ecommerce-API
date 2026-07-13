@@ -45,8 +45,8 @@ export class ConfigService {
     return this.config.getOrThrow('JWT_REFRESH_SECRET', { infer: true });
   }
 
-  get pendingAuthSecret() {
-    return this.config.getOrThrow('JWT_PENDING_AUTH_SECRET', { infer: true });
+  get pendingSecret() {
+    return this.config.getOrThrow('JWT_PENDING_SECRET', { infer: true });
   }
 
   get smtpUser() {

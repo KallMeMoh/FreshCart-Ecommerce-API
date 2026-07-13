@@ -50,6 +50,10 @@ export class AuthRepository {
     return this.redisClient.get(this.KEYS.login2FA(userId));
   }
 
+  async isTokenBlacklisted(tokenJti: string) {
+    return this.redisClient.get(this.KEYS.jwtBlacklist(tokenJti));
+  }
+
   async blacklistToken(jti: string) {
     return this.redisClient.set(
       this.KEYS.jwtBlacklist(jti),

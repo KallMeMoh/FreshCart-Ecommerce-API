@@ -58,10 +58,9 @@ export class AuthService {
 
     return {
       requires2FA: false,
-      pendingToken: null,
       accessToken,
       refreshToken,
-    };
+    } as const;
   }
 
   async signup({ username, email, password }: SignupDto) {
@@ -121,8 +120,8 @@ export class AuthService {
       const pendingToken = this.jwtService.sign(
         { sub: user._id, role: user.role, jti: randomUUID() },
         {
-          secret: this.configService.pendingAuthSecret,
-          expiresIn: '10m',
+          secret: this.configService.pendingSecret,
+          expiresIn: '5m',
         },
       );
 
@@ -133,31 +132,43 @@ export class AuthService {
       return {
         requires2FA: true,
         pendingToken,
-        accessToken: null,
-        refreshToken: null,
-      };
+      } as const;
     }
 
     return this.generateTokens(user._id.toString(), user.role);
   }
 
-  async completeLogin(user: RUser, otp: string) {
-    const code = await this.authRepository.get2FACode(user.id);
+  async completeLogin(
+    payload: { sub: string; role: UserRoleEnum; jti: string },
+    otp: string,
+  ) {
+    const [user, blacklistedToken] = await Promise.all([
+      this.usersRepository.findById(payload.sub),
+      this.authRepository.isTokenBlacklisted(payload.jti),
+    ]);
+
+    if (!user) throw new NotFoundException('Account does not exist');
+    if (blacklistedToken)
+      throw new ConflictException('Pending auth was already resolved');
+
+    const code = await this.authRepository.get2FACode(user._id.toString());
 
     if (!code) throw new NotFoundException('OTP Expired, please login again');
 
-    const loginAttempts = await this.authRepository.getLoginAttempts(user.id);
+    const loginAttempts = await this.authRepository.getLoginAttempts(
+      user._id.toString(),
+    );
     if (loginAttempts && parseInt(loginAttempts) > 5)
       throw new UnauthorizedException(
         'Account temporarily banned, try again later',
       );
 
     if (otp !== code) {
-      await this.authRepository.incrementLoginAttempts(user.id);
+      await this.authRepository.incrementLoginAttempts(user._id.toString());
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    return this.generateTokens(user.id, user.role);
+    return this.generateTokens(user._id.toString(), user.role);
   }
 
   async googleSignup(idToken: string) {

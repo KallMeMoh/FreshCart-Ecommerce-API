@@ -38,7 +38,7 @@ export class EnvironmentVariables {
   JWT_REFRESH_SECRET!: string;
 
   @IsString()
-  JWT_PENDING_AUTH_SECRET!: string;
+  JWT_PENDING_SECRET!: string;
 
   @IsString()
   SMTP_USER!: string;

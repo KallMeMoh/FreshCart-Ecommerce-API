@@ -9,24 +9,29 @@ import {
 } from '@nestjs/common';
 import type { Response } from 'express';
 import { ClientType } from '../../common/decorators/client-type.decorator';
-import { ExtractUser } from '../../common/decorators/extract-user';
+import { ExtractUser } from '../../common/decorators/extract-user.decorator';
 import { ClientTypeEnum } from '../../common/enums/client-type.enum';
 import { AccessTokenGuard } from '../../common/guards/access-token.guard';
-import { PendingTokenGuard } from '../../common/guards/pending-token.guard';
 import { RefreshTokenGuard } from '../../common/guards/refresh-token.guard';
 import { ParseClientTypePipe } from '../../common/pipes/parse-client-type.pipe';
-import { ParseOtpPipe } from '../../common/pipes/parse-otp.pipe';
+import { RequiredFieldPipe } from '../../common/pipes/required-field.pipe';
 import type { RUser } from '../../types/express';
 import { AuthService } from './auth.service';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { LoginCompletionDto } from './dto/login-completion.dto';
 import { LoginDto } from './dto/login.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { SignupDto } from './dto/signup.dto';
-import { RequiredFieldPipe } from '../../common/pipes/required-field.pipe';
+import { JwtService } from '../token/jwt.service';
+import { ConfigService } from '../config/config.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
+  ) {}
 
   @HttpCode(201)
   @Post('signup')
@@ -42,78 +47,78 @@ export class AuthController {
     clientType: ClientTypeEnum,
     @Body() body: LoginDto,
   ) {
-    const { requires2FA, accessToken, refreshToken, pendingToken } =
-      await this.authService.login(body);
+    const credentials = await this.authService.login(body);
 
-    if (clientType === ClientTypeEnum.Web) {
-      res.cookie(
-        requires2FA ? 'pendingToken' : 'refreshToken',
-        requires2FA ? pendingToken : refreshToken,
-        {
+    if (credentials.requires2FA) {
+      return {
+        requires2FA: true,
+        pendingToken: credentials.pendingToken,
+      };
+    } else {
+      if (clientType === ClientTypeEnum.Web) {
+        res.cookie('refreshToken', credentials.refreshToken, {
           httpOnly: true,
           secure: true,
           sameSite: 'lax',
-          maxAge: requires2FA ? 1000 * 60 * 5 : 1000 * 60 * 60 * 24 * 7,
+          maxAge: 1000 * 60 * 60 * 24 * 7,
           path: '/',
-        },
-      );
+        });
+
+        return {
+          requires2FA: false,
+          accessToken: credentials.accessToken,
+        };
+      } else {
+        return {
+          requires2FA: false,
+          accessToken: credentials.accessToken,
+          refreshToken: credentials.refreshToken,
+        };
+      }
     }
-
-    return {
-      message: requires2FA
-        ? 'Please provide your 2FA OTP'
-        : 'Logged in successfully',
-
-      credentials: {
-        requires2FA,
-        accessToken,
-        ...(clientType !== ClientTypeEnum.Web
-          ? {
-              pendingToken,
-              refreshToken,
-            }
-          : {}),
-      },
-    };
   }
 
   @Post('login/complete')
-  @UseGuards(PendingTokenGuard)
   async completeLogin(
-    @Body('otp', ParseOtpPipe) otp: string,
-    @ExtractUser() user: RUser,
+    @Body() { token, otp }: LoginCompletionDto,
     @Res({ passthrough: true }) res: Response,
     @ClientType('x-client-type', ParseClientTypePipe)
     clientType: ClientTypeEnum,
   ) {
-    const { requires2FA, accessToken, refreshToken, pendingToken } =
-      await this.authService.completeLogin(user, otp);
+    const payload = await this.jwtService.validate(
+      token,
+      this.configService.pendingSecret,
+    );
+
+    const { accessToken, refreshToken } = await this.authService.completeLogin(
+      payload,
+      otp,
+    );
 
     if (clientType === ClientTypeEnum.Web) {
-      res.cookie(
-        requires2FA ? 'pendingToken' : 'refreshToken',
-        requires2FA ? pendingToken : refreshToken,
-        {
-          httpOnly: true,
-          secure: true,
-          sameSite: 'lax',
-          maxAge: requires2FA ? 1000 * 60 * 5 : 1000 * 60 * 60 * 24 * 7,
-          path: '/',
-        },
-      );
-    }
+      res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'lax',
+        maxAge: 1000 * 60 * 60 * 24 * 7,
+        path: '/',
+      });
 
-    return {
-      message: 'Logged in successfully',
-      credentials: {
-        accessToken,
-        ...(clientType !== ClientTypeEnum.Web
-          ? {
-              refreshToken,
-            }
-          : {}),
-      },
-    };
+      return {
+        message: 'Logged in successfully',
+        credentials: {
+          accessToken,
+        },
+      };
+    } else {
+      return {
+        message: 'Logged in successfully',
+        credentials: {
+          accessToken,
+          refreshToken,
+        },
+      };
+    }
   }
 
   @HttpCode(201)
