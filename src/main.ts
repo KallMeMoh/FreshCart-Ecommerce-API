@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ConfigService } from './modules/config/config.service';
 import cookieParser from 'cookie-parser';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 const logger = new Logger('Bootstrap');
 async function bootstrap() {
@@ -19,6 +20,23 @@ async function bootstrap() {
       transform: true,
     }),
   );
+
+  const docConfig = new DocumentBuilder()
+    .setTitle('E-Commerce')
+    .setDescription('Idk what description to use')
+    .setVersion('1.0')
+    .build();
+  const documentFactory = () => SwaggerModule.createDocument(app, docConfig);
+  SwaggerModule.setup('docs', app, documentFactory, {
+    customSiteTitle: 'E-Commerce API Documentation',
+    customCss: '.swagger-ui .topbar { display: none }',
+    customfavIcon: '',
+    jsonDocumentUrl: 'docs-json',
+    explorer: true,
+    swaggerOptions: {
+      persistAuthorization: true,
+    },
+  });
 
   const configService = app.get(ConfigService);
   const port = configService.port;

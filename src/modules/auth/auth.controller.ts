@@ -19,11 +19,21 @@ import type { RUser } from '../../types/express';
 import { AuthService } from './auth.service';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginCompletionDto } from './dto/login-completion.dto';
-import { LoginDto } from './dto/login.dto';
+import { LoginDto, LoginPendingDto, LoginSuccessDto } from './dto/login.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { SignupDto } from './dto/signup.dto';
 import { JwtService } from '../token/jwt.service';
 import { ConfigService } from '../config/config.service';
+import {
+  ApiExtraModels,
+  ApiHeader,
+  ApiOkResponse,
+  ApiOperation,
+  ApiResponse,
+  getSchemaPath,
+} from '@nestjs/swagger';
+import { ErrorResponseDto } from '../../common/dto/error-response.dto';
+import { ValidationErrorResponseDto } from '../../common/dto/validation-error-response.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -33,13 +43,65 @@ export class AuthController {
     private readonly configService: ConfigService,
   ) {}
 
+  @ApiOperation({
+    summary: 'Register a new user account.',
+    description:
+      'Creates a new user account and returns the created user, excluding ' +
+      'the password. Sends a verification email automatically; the account ' +
+      'is usable immediately but flagged as unverified until the link is clicked.\n' +
+      'Note: Verification link sent point to a frontend page at /verify/:token',
+  })
+  @ApiResponse({ status: 201, description: 'User account create successfully' })
+  @ApiResponse({
+    status: 400,
+    type: ValidationErrorResponseDto,
+    description: 'Validation Failed; Match Signup Schema',
+  })
+  @ApiResponse({
+    type: ErrorResponseDto,
+    status: 409,
+    description: 'An account with this email already exists.',
+  })
   @HttpCode(201)
   @Post('signup')
   async signup(@Body() body: SignupDto) {
     await this.authService.signup(body);
-    return { message: 'Account created successfully' };
   }
 
+  @ApiOperation({
+    summary: 'Login to an existing account.',
+    description:
+      'Authenticates a user and returns an access + refresh token pair for accessing protected routes.\n' +
+      'Note: if the account has 2FA enabled, a pendingToken is returned instead of a access + refresh token pair.',
+  })
+  @ApiHeader({
+    name: 'x-client-type',
+    description:
+      'Identifies the calling client. Determines whether tokens are set as httpOnly cookies (Web) or returned in the response body (Mobile).',
+    enum: ClientTypeEnum,
+    required: true,
+  })
+  @ApiExtraModels(LoginSuccessDto, LoginPendingDto)
+  @ApiOkResponse({
+    description: 'Login succeeded, or 2FA verification is now required.',
+    schema: {
+      oneOf: [
+        { $ref: getSchemaPath(LoginSuccessDto) },
+        { $ref: getSchemaPath(LoginPendingDto) },
+      ],
+    },
+  })
+  @ApiResponse({
+    type: ValidationErrorResponseDto,
+    status: 400,
+    description: 'Request body/query failed validation.',
+  })
+  @ApiResponse({
+    type: ErrorResponseDto,
+    status: 401,
+    description: 'Invalid email or password.',
+  })
+  @HttpCode(200)
   @Post('login')
   async login(
     @Res({ passthrough: true }) res: Response,
@@ -105,18 +167,12 @@ export class AuthController {
       });
 
       return {
-        message: 'Logged in successfully',
-        credentials: {
-          accessToken,
-        },
+        accessToken,
       };
     } else {
       return {
-        message: 'Logged in successfully',
-        credentials: {
-          accessToken,
-          refreshToken,
-        },
+        accessToken,
+        refreshToken,
       };
     }
   }
