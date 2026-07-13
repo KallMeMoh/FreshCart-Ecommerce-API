@@ -4,6 +4,8 @@ import { randomBytes, randomInt, randomUUID } from 'node:crypto';
 import {
   BadRequestException,
   ConflictException,
+  HttpException,
+  HttpStatus,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -147,25 +149,25 @@ export class AuthService {
       this.authRepository.isTokenBlacklisted(payload.jti),
     ]);
 
-    if (!user) throw new NotFoundException('Account does not exist');
-    if (blacklistedToken)
-      throw new ConflictException('Pending auth was already resolved');
+    if (!user || blacklistedToken)
+      throw new UnauthorizedException('Invalid credentials');
 
     const code = await this.authRepository.get2FACode(user._id.toString());
-
-    if (!code) throw new NotFoundException('OTP Expired, please login again');
+    if (!code)
+      throw new UnauthorizedException('OTP expired, please login again');
 
     const loginAttempts = await this.authRepository.getLoginAttempts(
       user._id.toString(),
     );
     if (loginAttempts && parseInt(loginAttempts) > 5)
-      throw new UnauthorizedException(
-        'Account temporarily banned, try again later',
+      throw new HttpException(
+        'Too many attempts, try again later',
+        HttpStatus.TOO_MANY_REQUESTS,
       );
 
     if (otp !== code) {
       await this.authRepository.incrementLoginAttempts(user._id.toString());
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('Invalid OTP');
     }
 
     return this.generateTokens(user._id.toString(), user.role);
