@@ -20,7 +20,7 @@ import { CreationStatusEnum } from '../../common/enums/creation-status.enum';
 import { AccessTokenGuard } from '../../common/guards/access-token.guard';
 import { UserRoleEnum } from '../user/enums/user-role.enum';
 import { RolesGuard } from '../../common/guards/user-roles.guard';
-import { Roles } from '../../common/decorators/roles';
+import { Roles } from '../../common/decorators/roles.decorator';
 
 @UseGuards(AccessTokenGuard)
 @Controller('subcategories')

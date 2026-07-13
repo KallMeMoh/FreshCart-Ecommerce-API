@@ -13,7 +13,7 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { AccessTokenGuard } from '../../common/guards/access-token.guard';
 import { UserRoleEnum } from '../user/enums/user-role.enum';
-import { Roles } from '../../common/decorators/roles';
+import { Roles } from '../../common/decorators/roles.decorator';
 import { RolesGuard } from '../../common/guards/user-roles.guard';
 
 @UseGuards(AccessTokenGuard)

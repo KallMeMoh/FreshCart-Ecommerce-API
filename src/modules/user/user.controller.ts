@@ -12,7 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
-import { ExtractUser } from '../../common/decorators/extract-user';
+import { ExtractUser } from '../../common/decorators/extract-user.decorator';
 import { AllowedPictureMimeType } from '../../common/enums/picture-mimetype.enum';
 import { AccessTokenGuard } from '../../common/guards/access-token.guard';
 import type { RUser } from '../../types/express';

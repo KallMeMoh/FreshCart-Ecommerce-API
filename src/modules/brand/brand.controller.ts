@@ -10,7 +10,7 @@ import {
   UnprocessableEntityException,
   UseGuards,
 } from '@nestjs/common';
-import { Roles } from '../../common/decorators/roles';
+import { Roles } from '../../common/decorators/roles.decorator';
 import { CreationStatusEnum } from '../../common/enums/creation-status.enum';
 import { AccessTokenGuard } from '../../common/guards/access-token.guard';
 import { RolesGuard } from '../../common/guards/user-roles.guard';

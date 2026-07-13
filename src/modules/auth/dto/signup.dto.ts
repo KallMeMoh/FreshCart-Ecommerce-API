@@ -7,7 +7,7 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
-import { MatchesField } from '../../../common/decorators/matches-field';
+import { MatchesField } from '../../../common/decorators/matches-field.decorator';
 
 export class SignupDto {
   @Transform(({ value }: { value?: string }) => value?.trim())

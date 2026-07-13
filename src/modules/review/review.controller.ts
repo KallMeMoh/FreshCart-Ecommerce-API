@@ -10,7 +10,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ExtractUser } from '../../common/decorators/extract-user';
+import { ExtractUser } from '../../common/decorators/extract-user.decorator';
 import { AccessTokenGuard } from '../../common/guards/access-token.guard';
 import { ParseMongoIdPipe } from '../../common/pipes/parse-mongo-id.pipe';
 import { UserRoleEnum } from '../user/enums/user-role.enum';
