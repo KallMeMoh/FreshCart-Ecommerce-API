@@ -95,10 +95,10 @@ export class AuthService {
 
   async login({ email, password }: LoginDto) {
     const user = await this.usersRepository.findByEmail(email);
-    if (!user) throw new NotFoundException('Account does not exist');
+    if (!user) throw new UnauthorizedException('Invalid credentials');
 
     if (user.provider !== AuthProviderEnum.System)
-      throw new BadRequestException(
+      throw new UnauthorizedException(
         'This account uses Google sign-in. Please continue with Google.',
       );
 
@@ -106,7 +106,7 @@ export class AuthService {
       user._id.toString(),
     );
     if (loginAttempts && parseInt(loginAttempts) > 5)
-      throw new NotFoundException(
+      throw new UnauthorizedException(
         'Account temporarily banned, try again later',
       );
 
