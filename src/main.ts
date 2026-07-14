@@ -51,7 +51,6 @@ async function bootstrap() {
   SwaggerModule.setup('docs', app, documentFactory, {
     customSiteTitle: 'E-Commerce API Documentation',
     customCss: '.swagger-ui .topbar { display: none }',
-    customfavIcon: '',
     jsonDocumentUrl: 'docs-json',
     explorer: true,
     swaggerOptions: {
