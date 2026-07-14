@@ -4,6 +4,7 @@ import { AppModule } from './app.module';
 import { ConfigService } from './modules/config/config.service';
 import cookieParser from 'cookie-parser';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { operationsSorter } from './common/utils/operation-sorter';
 
 const logger = new Logger('Bootstrap');
 async function bootstrap() {
@@ -55,6 +56,7 @@ async function bootstrap() {
     explorer: true,
     swaggerOptions: {
       persistAuthorization: true,
+      operationsSorter,
     },
     customJs: [
       'https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.32.8/swagger-ui-bundle.js',
