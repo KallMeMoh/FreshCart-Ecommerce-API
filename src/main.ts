@@ -57,6 +57,13 @@ async function bootstrap() {
     swaggerOptions: {
       persistAuthorization: true,
     },
+    customJs: [
+      'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.32.8/swagger-ui-bundle.min.js',
+      'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.32.8/swagger-ui-standalone-preset.min.js',
+    ],
+    customCssUrl: [
+      'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.32.8/swagger-ui.min.css',
+    ],
   });
 
   const configService = app.get(ConfigService);
