@@ -18,6 +18,7 @@ import { AccessTokenGuard } from '../../common/guards/access-token.guard';
 import { UserRoleEnum } from '../user/enums/user-role.enum';
 import { RolesGuard } from '../../common/guards/user-roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @UseGuards(AccessTokenGuard)
 @Controller('categories')
@@ -30,6 +31,7 @@ export class CategoriesController {
   @HttpCode(201)
   @Roles(UserRoleEnum.Admin)
   @UseGuards(RolesGuard)
+  @ApiBearerAuth('access-token-header')
   @Post()
   async create(@Body() createCategoryDto: CreateCategoryDto) {
     const { logoKey, ...category } =
@@ -48,6 +50,7 @@ export class CategoriesController {
   @HttpCode(201)
   @Roles(UserRoleEnum.Admin)
   @UseGuards(RolesGuard)
+  @ApiBearerAuth('access-token-header')
   @Post(':id/confirm')
   async confirmCategoryCreation(@Param('id') categoryId: string) {
     const category =
@@ -78,6 +81,7 @@ export class CategoriesController {
 
   @Roles(UserRoleEnum.Admin)
   @UseGuards(RolesGuard)
+  @ApiBearerAuth('access-token-header')
   @Patch(':id')
   update(
     @Param('id') id: string,
@@ -89,6 +93,7 @@ export class CategoriesController {
   @HttpCode(204)
   @Roles(UserRoleEnum.Admin)
   @UseGuards(RolesGuard)
+  @ApiBearerAuth('access-token-header')
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.categoriesService.remove(id);

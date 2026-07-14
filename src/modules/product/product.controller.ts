@@ -15,6 +15,7 @@ import { AccessTokenGuard } from '../../common/guards/access-token.guard';
 import { UserRoleEnum } from '../user/enums/user-role.enum';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { RolesGuard } from '../../common/guards/user-roles.guard';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @UseGuards(AccessTokenGuard)
 @Controller('products')
@@ -23,6 +24,7 @@ export class ProductsController {
 
   @Roles(UserRoleEnum.Admin)
   @UseGuards(RolesGuard)
+  @ApiBearerAuth('access-token-header')
   @Post()
   create(@Body() createProductDto: CreateProductDto) {
     return this.productsService.create(createProductDto);
@@ -33,22 +35,27 @@ export class ProductsController {
     return this.productsService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
+  @Get(':productId')
+  findOne(@Param('productId') id: string) {
     return this.productsService.findOne(+id);
   }
 
   @Roles(UserRoleEnum.Admin)
   @UseGuards(RolesGuard)
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
+  @ApiBearerAuth('access-token-header')
+  @Patch(':productId')
+  update(
+    @Param('productId') id: string,
+    @Body() updateProductDto: UpdateProductDto,
+  ) {
     return this.productsService.update(+id, updateProductDto);
   }
 
   @Roles(UserRoleEnum.Admin)
   @UseGuards(RolesGuard)
-  @Delete(':id')
-  remove(@Param('id') id: string) {
+  @ApiBearerAuth('access-token-header')
+  @Delete(':productId')
+  remove(@Param('productId') id: string) {
     return this.productsService.remove(+id);
   }
 }

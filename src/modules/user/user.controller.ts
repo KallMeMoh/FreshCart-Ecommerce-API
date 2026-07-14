@@ -23,8 +23,10 @@ import { UpdatePasswordDto } from './dto/update-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersService } from './user.service';
 import { RequiredFieldPipe } from '../../common/pipes/required-field.pipe';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @UseGuards(AccessTokenGuard)
+@ApiBearerAuth('access-token-header')
 @Controller('users')
 export class UsersController {
   constructor(
@@ -34,6 +36,7 @@ export class UsersController {
     private readonly mailService: MailService,
   ) {}
 
+  // @ApiBearerAuth('access-token-header')
   @Get('avatar-upload-url')
   getAvatarUploadUrl(
     @Query('mimetype', new ParseEnumPipe(AllowedPictureMimeType))
@@ -44,8 +47,8 @@ export class UsersController {
     return this.r2BucketService.generateUploadUrl(key, mimetype);
   }
 
-  @Get(':id')
-  async getProfile(@Param('id') id: string) {
+  @Get('me')
+  async getProfile(@ExtractUser() { id }: RUser) {
     const { avatarKey, ...user } = await this.usersService.findOne(id);
     const avatar = avatarKey
       ? this.r2BucketService.generateReadUrl(avatarKey)
@@ -109,16 +112,16 @@ export class UsersController {
     return { message: 'Password updated successfully' };
   }
 
-  @Put(':id')
+  @Put('me')
   async updateProfile(
-    @Param('id') id: string,
+    @ExtractUser() { id }: RUser,
     @Body() updateUserDto: UpdateUserDto,
   ) {
     return await this.usersService.updateOne(id, updateUserDto);
   }
 
   @HttpCode(204)
-  @Delete(':id')
+  @Delete('me')
   deleteAccount(@ExtractUser() user: RUser) {
     return this.usersService.delete(user.id, user.tokenId);
   }

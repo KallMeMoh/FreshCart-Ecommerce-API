@@ -30,10 +30,12 @@ export class ReviewsRepository {
       .lean();
   }
 
-  async updateOne(slug: string, data: Partial<Review>) {
-    return this.reviewModel.findOneAndUpdate({ slug }, data, {
-      returnDocument: 'after',
-    });
+  async updateOne(_id: string, data: Partial<Review>) {
+    return this.reviewModel
+      .findOneAndUpdate({ _id }, data, {
+        returnDocument: 'after',
+      })
+      .lean();
   }
 
   deleteOne(_id: string) {

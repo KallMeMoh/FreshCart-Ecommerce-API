@@ -18,6 +18,7 @@ import { R2BucketService } from '../bucket/bucket.service';
 import { UserRoleEnum } from '../user/enums/user-role.enum';
 import { BrandsService } from './brand.service';
 import { CreateBrandDto, UpdateBrandDto } from './dto/brand.dto';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @UseGuards(AccessTokenGuard)
 @Controller('brands')
@@ -30,6 +31,7 @@ export class BrandsController {
   @HttpCode(201)
   @Roles(UserRoleEnum.Admin)
   @UseGuards(RolesGuard)
+  @ApiBearerAuth('access-token-header')
   @Post()
   async create(@Body() createBrandDto: CreateBrandDto) {
     const { logoKey, ...brand } =
@@ -48,6 +50,7 @@ export class BrandsController {
   @HttpCode(201)
   @Roles(UserRoleEnum.Admin)
   @UseGuards(RolesGuard)
+  @ApiBearerAuth('access-token-header')
   @Post(':id/confirm')
   async confirmBrandCreation(@Param('id') brandId: string) {
     const brand = await this.brandsService.confirmBrandCreation(brandId);
@@ -77,6 +80,7 @@ export class BrandsController {
 
   @Roles(UserRoleEnum.Admin)
   @UseGuards(RolesGuard)
+  @ApiBearerAuth('access-token-header')
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateBrandDto: UpdateBrandDto) {
     return this.brandsService.update(id, updateBrandDto);
@@ -85,6 +89,7 @@ export class BrandsController {
   @HttpCode(204)
   @Roles(UserRoleEnum.Admin)
   @UseGuards(RolesGuard)
+  @ApiBearerAuth('access-token-header')
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.brandsService.remove(id);

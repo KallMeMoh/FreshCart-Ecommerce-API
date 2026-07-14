@@ -18,9 +18,10 @@ import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
 import { ReviewsService } from './review.service';
 import { DatabaseService } from '../database/database.service';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @UseGuards(AccessTokenGuard)
-@Controller('products/:id/reviews')
+@Controller('products/:productId/reviews')
 export class ReviewsController {
   constructor(
     private readonly reviewsService: ReviewsService,
@@ -28,10 +29,11 @@ export class ReviewsController {
   ) {}
 
   @HttpCode(201)
+  @ApiBearerAuth('access-token-header')
   @Post()
   create(
     @ExtractUser() user: { userId: string; userRole: UserRoleEnum },
-    @Param(':id', ParseMongoIdPipe) productId: string,
+    @Param(':productId', ParseMongoIdPipe) productId: string,
     @Body() body: CreateReviewDto,
   ) {
     return this.databaseService.runInTransaction(async (session) => {
@@ -44,29 +46,31 @@ export class ReviewsController {
 
   @Get()
   findAll(
-    @Param(':id', ParseMongoIdPipe) productId: string,
+    @Param(':productId', ParseMongoIdPipe) productId: string,
     @Query('page') page: number,
     @Query('limit') limit: number,
   ) {
     return this.reviewsService.findAll(productId, page, limit);
   }
 
-  @Get(':id')
-  findOne(@Param(':id', ParseMongoIdPipe) reviewId: string) {
+  @Get(':reviewId')
+  findOne(@Param(':reviewId', ParseMongoIdPipe) reviewId: string) {
     return this.reviewsService.findOne(reviewId);
   }
 
-  @Patch(':id')
+  @ApiBearerAuth('access-token-header')
+  @Patch(':reviewId')
   update(
-    @Param(':id', ParseMongoIdPipe) productId: string,
+    @Param(':reviewId', ParseMongoIdPipe) reviewId: string,
     @Body() updateReviewDto: UpdateReviewDto,
   ) {
-    return this.reviewsService.update(productId, updateReviewDto);
+    return this.reviewsService.update(reviewId, updateReviewDto);
   }
 
+  @ApiBearerAuth('access-token-header')
   @HttpCode(204)
-  @Delete(':id')
-  remove(@Param(':id', ParseMongoIdPipe) productId: string) {
-    return this.reviewsService.remove(productId);
+  @Delete(':reviewId')
+  async remove(@Param(':reviewId', ParseMongoIdPipe) reviewId: string) {
+    await this.reviewsService.remove(reviewId);
   }
 }

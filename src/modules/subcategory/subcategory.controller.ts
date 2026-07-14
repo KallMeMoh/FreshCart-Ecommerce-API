@@ -21,6 +21,7 @@ import { AccessTokenGuard } from '../../common/guards/access-token.guard';
 import { UserRoleEnum } from '../user/enums/user-role.enum';
 import { RolesGuard } from '../../common/guards/user-roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @UseGuards(AccessTokenGuard)
 @Controller('subcategories')
@@ -33,6 +34,7 @@ export class SubcategoriesController {
   @HttpCode(201)
   @Roles(UserRoleEnum.Admin)
   @UseGuards(RolesGuard)
+  @ApiBearerAuth('access-token-header')
   @Post()
   async create(@Body() createSubcategoryDto: CreateSubcategoryDto) {
     const { logoKey, ...subcategory } =
@@ -51,6 +53,7 @@ export class SubcategoriesController {
   @HttpCode(201)
   @Roles(UserRoleEnum.Admin)
   @UseGuards(RolesGuard)
+  @ApiBearerAuth('access-token-header')
   @Post(':id/confirm')
   async confirmSubcategoryCreation(@Param('id') subcategoryId: string) {
     const subcategory =
@@ -81,6 +84,7 @@ export class SubcategoriesController {
 
   @Roles(UserRoleEnum.Admin)
   @UseGuards(RolesGuard)
+  @ApiBearerAuth('access-token-header')
   @Patch(':id')
   update(
     @Param('id') id: string,
@@ -92,6 +96,7 @@ export class SubcategoriesController {
   @HttpCode(204)
   @Roles(UserRoleEnum.Admin)
   @UseGuards(RolesGuard)
+  @ApiBearerAuth('access-token-header')
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.subcategoriesService.remove(id);

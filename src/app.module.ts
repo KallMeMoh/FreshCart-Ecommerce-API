@@ -11,7 +11,6 @@ import { ConfigService } from './modules/config/config.service';
 import { DatabaseModule } from './modules/database/database.module';
 import { MailModule } from './modules/mail/mail.module';
 import { ProductsModule } from './modules/product/product.module';
-import { ReviewsModule } from './modules/review/review.module';
 import { SubcategoriesModule } from './modules/subcategory/subcategory.module';
 import { UsersModule } from './modules/user/user.module';
 
@@ -37,7 +36,6 @@ import { UsersModule } from './modules/user/user.module';
     CategoriesModule,
     SubcategoriesModule,
     BrandsModule,
-    ReviewsModule,
   ],
 })
 export class AppModule implements NestModule {
