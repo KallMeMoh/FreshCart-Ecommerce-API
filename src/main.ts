@@ -58,11 +58,11 @@ async function bootstrap() {
       persistAuthorization: true,
     },
     customJs: [
-      'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.32.8/swagger-ui-bundle.min.js',
-      'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.32.8/swagger-ui-standalone-preset.min.js',
+      'https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.32.8/swagger-ui-bundle.js',
+      'https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.32.8/swagger-ui-standalone-preset.js',
     ],
     customCssUrl: [
-      'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.32.8/swagger-ui.min.css',
+      'https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.32.8/swagger-ui.css',
     ],
   });
 
