@@ -4,7 +4,7 @@ import {
   ValidationArguments,
 } from 'class-validator';
 
-export function greaterThanOrEqual(
+export function GreaterThanOrEqual(
   field: string,
   validationOptions?: ValidationOptions,
 ) {
