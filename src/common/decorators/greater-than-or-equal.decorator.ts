@@ -17,13 +17,15 @@ export function GreaterThanOrEqual(
       options: validationOptions,
       validator: {
         validate(value: number, args: ValidationArguments) {
-          const [relatedPropertyName] = args.constraints;
-          const relatedValue = (args.object as any)[relatedPropertyName];
-          if (value === undefined || relatedValue === undefined) return true;
+          const [relatedPropertyName] = args.constraints as string[];
+          const relatedValue = args.object[relatedPropertyName] as
+            | number
+            | undefined;
+          if (!relatedValue) return false;
           return value >= relatedValue;
         },
         defaultMessage(args: ValidationArguments) {
-          const [relatedPropertyName] = args.constraints;
+          const [relatedPropertyName] = args.constraints as string[];
           return `${args.property} must be greater than or equal to ${relatedPropertyName}`;
         },
       },
