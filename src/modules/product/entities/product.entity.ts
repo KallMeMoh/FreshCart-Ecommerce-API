@@ -53,7 +53,7 @@ export class Product {
     required: true,
   })
   discount!: {
-    type: DiscounTypeEnum;
+    discountType: DiscounTypeEnum;
     value: number;
   };
 
@@ -67,46 +67,46 @@ export class Product {
     type: Number,
     default: 0,
   })
-  averageRating!: number;
+  averageRating: number = 0;
 
   @Prop({
     type: Number,
     default: 0,
   })
-  reviewCount!: number;
+  reviewCount: number = 0;
 
   @Prop({
     type: String,
     default: null,
   })
-  logoKey!: string | null;
+  logoKey: string | null = null;
 
   @Prop({
     type: [String],
     default: [],
   })
-  galleryKeys!: string[];
+  galleryKeys: string[] = [];
 
   @Prop({
     type: Types.ObjectId,
     required: true,
     ref: Category.name,
   })
-  category!: Types.ObjectId;
+  category!: string;
 
   @Prop({
     type: Types.ObjectId,
     required: true,
     ref: Subcategory.name,
   })
-  subcategory!: Types.ObjectId;
+  subcategory!: string;
 
   @Prop({
     type: Types.ObjectId,
     required: true,
     ref: Brand.name,
   })
-  brand!: Types.ObjectId;
+  brand!: string;
 
   @Prop({
     type: String,
